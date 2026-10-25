@@ -1,0 +1,53 @@
+{
+  "stations": [
+    {
+      "id": "R20",
+      "name": "14 St–Union Sq",
+      "routes": [
+        "N",
+        "Q",
+        "R",
+        "W"
+      ],
+      "latitude": 40.735736,
+      "longitude": -73.990568
+    },
+    {
+      "id": "R21",
+      "name": "8 St–NYU",
+      "routes": [
+        "R",
+        "W"
+      ],
+      "latitude": 40.730328,
+      "longitude": -73.992629
+    },
+    {
+      "id": "D21",
+      "name": "Broadway–Lafayette St",
+      "routes": [
+        "B",
+        "D",
+        "F",
+        "M"
+      ],
+      "latitude": 40.725297,
+      "longitude": -73.996204
+    },
+    {
+      "id": "A32",
+      "name": "W 4 St–Wash Sq",
+      "routes": [
+        "A",
+        "C",
+        "E",
+        "B",
+        "D",
+        "F",
+        "M"
+      ],
+      "latitude": 40.732338,
+      "longitude": -74.000495
+    }
+  ]
+}

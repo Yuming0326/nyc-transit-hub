@@ -1,0 +1,14 @@
+{
+  "station_id": "R20",
+  "source": "demo",
+  "updated_at": "2026-10-24T16:00:00+00:00",
+  "arrivals": [
+    {
+      "id": "sample-R20N-1",
+      "route_id": "N",
+      "destination": "Astoria\u2013Ditmars Blvd (sample)",
+      "direction": "Northbound",
+      "arrival_time": "2026-10-24T16:03:00+00:00"
+    }
+  ]
+}

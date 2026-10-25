@@ -1,0 +1,14 @@
+{
+  "source": "demo",
+  "alerts": [
+    {
+      "id": "sample-alert-1",
+      "header": "Fictional service change (sample)",
+      "description": "Sample only; not an actual MTA travel advisory.",
+      "route_ids": [
+        "N",
+        "R"
+      ]
+    }
+  ]
+}
