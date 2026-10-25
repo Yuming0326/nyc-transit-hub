@@ -32,6 +32,12 @@ def test_alert_filter(client):
 def test_favorites_require_auth(client, method, path):
     assert getattr(client, method)(path).status_code == 401
 
-def test_live_mode_does_not_return_sample_data():
+def test_live_mode_does_not_return_sample_data(monkeypatch):
+    from app.services.mta_client import MTAClient, MTAError
+    def fail(*args):
+        raise MTAError('Upstream unavailable')
+    monkeypatch.setattr(MTAClient, 'arrivals', fail)
     client = create_app({'TESTING': True, 'TRANSIT_MODE': 'live'}).test_client()
-    assert client.get('/api/stations/R20/arrivals').status_code == 503
+    response = client.get('/api/stations/R20/arrivals')
+    assert response.status_code == 503
+    assert set(response.json) == {'error'}

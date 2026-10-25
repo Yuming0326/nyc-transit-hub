@@ -1,5 +1,7 @@
 # 四人团队工作计划
 
+后端接入更新：第 2 项现已在本地交付版本接通 live 模式，35 项离线测试通过，并完成 MTA 在线接口验证。默认配置仍为 demo。当前网页的 demo 标签仍需第 3、4 位同学调整；完整网页联调和团队合并尚未完成。详见 [后端交付说明](backend-handoff.zh-CN.md)。下文保留原分工计划作为任务背景。
+
 技术栈：React + Vite 前端、Python Flask 后端、Firebase Authentication 与 Cloud Firestore（可选）。
 
 本阶段保留当前应用结构：查询和选择站点，展示预计到站时间、行驶方向、线路及服务通知。沿用现有 API，不新增 `/api/status`，也不将首页改为线路状态 Dashboard。

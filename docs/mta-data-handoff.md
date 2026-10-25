@@ -1,5 +1,7 @@
 # MTA data owner handoff
 
+Role 2 integration update: this local delivery now wires the adapter through the existing Flask APIs with per-URL validated feed caching, app-local catalogs, configurable timeouts/freshness, explicit 503 errors, and 35 passing offline tests. See [backend handoff](backend-handoff.zh-CN.md) and the saved online verification report. The original role 1 handoff below records its prior delivery state; it is not a claim that integration is still missing. Team merge/approval and full frontend integration remain pending.
+
 ## Scope
 
 Role 1 provides a Flask-independent static GTFS importer, realtime protobuf fetching, arrival and alert normalization, and tests. Flask still serves demo data. Role 2 owns integration in transit_service.py, routes, configuration, and the API contract. The complete generated directory does not automatically replace the development station subset.

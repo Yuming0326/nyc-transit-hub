@@ -1,7 +1,23 @@
 # NYC Transit Hub
 
 React + Vite frontend, Python Flask API, Firebase Authentication and Cloud Firestore.
-The starter runs without Firebase credentials. The running API still serves explicitly fictional demo data. The MTA data adapter and static importer are implemented; connecting them to the live Flask endpoints remains role 2’s task.
+The application runs without Firebase credentials. Demo mode remains the default. Role 2 has connected the MTA adapter to the existing Flask endpoints; set `TRANSIT_MODE=live` to use the imported station catalog and official realtime arrivals/alerts. Live failures return explicit errors, never fictional fallback data. Frontend demo labels still need to be made conditional before a live webpage presentation.
+
+## Backend handoff (role 2)
+
+See [Windows startup and team delivery instructions](docs/backend-handoff.zh-CN.md). Backend offline checks: 35 tests passed. The opt-in online check is `python scripts/check_live_api.py` from `backend/`; the saved [verification report](docs/backend-live-verification.json) records one successful check, not a continuing availability guarantee.
+
+On Windows PowerShell, from `backend/`:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+# For live mode, change TRANSIT_MODE=demo to TRANSIT_MODE=live in .env.
+.\.venv\Scripts\python.exe run.py
+```
+
+If `.env` already exists, edit it instead of copying over it. Restart after changing configuration. No MTA API key or Firebase setup is required for these subway endpoints. Before presenting the webpage in live mode, coordinate with frontend owners to replace the hardcoded demo labels in HomePage, ArrivalBoard, ServiceAlerts, and the footer using actual response source/mode.
 
 ## Prerequisites
 Node.js 22+, Python 3.10+, npm. Run commands from the project root unless indicated.
