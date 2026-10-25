@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Clients use Flask. Admin SDK bypasses rules; Flask verifies user tokens.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

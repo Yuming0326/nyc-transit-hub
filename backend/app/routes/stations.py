@@ -1,0 +1,7 @@
+from flask import Blueprint, jsonify, request
+from ..services.transit_service import STATIONS
+bp = Blueprint('stations', __name__)
+@bp.get('/stations')
+def stations():
+    query = request.args.get('search', '').strip().casefold()
+    return jsonify(stations=[s for s in STATIONS if query in (s['name'] + ' ' + ' '.join(s['routes'])).casefold()])
