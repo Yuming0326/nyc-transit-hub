@@ -8,6 +8,8 @@ def create_app(test_config=None):
     app.config.from_object(Config)
     if test_config:
         app.config.update(test_config)
+    from .services.transit_service import init_transit
+    init_transit(app)
     CORS(app, resources={r'/api/*': {'origins': app.config['FRONTEND_ORIGIN']}})
     from .routes import health, stations, arrivals, alerts, favorites
     for module in (health, stations, arrivals, alerts, favorites):
