@@ -1,9 +1,25 @@
-export default function ArrivalBoard({ data, error, loading }) {
-  if (loading) return <p role="status">Loading arrivals…</p>;
-  return <section className="panel"><h2>Upcoming trains</h2>
+import React from 'react';
+
+function formatUpdatedAt(value) {
+  if (!value) return 'time unavailable';
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'time unavailable' : date.toLocaleTimeString();
+}
+
+function formatMinutes(value) {
+  const arrivalTime = new Date(value).getTime();
+  return Number.isNaN(arrivalTime) ? 'Time unavailable' : `${Math.max(0, Math.ceil((arrivalTime - Date.now()) / 60000))} min`;
+}
+
+export default function ArrivalBoard({ data, error, loading, refreshing, refresh }) {
+  const arrivals = Array.isArray(data?.arrivals) ? data.arrivals : [];
+  const sourceLabel = data?.source === 'mta' ? 'Live MTA data' : data?.source === 'demo' ? 'Demo data' : '';
+  const sourceClass = data?.source === 'mta' ? 'source-live' : 'source-demo';
+  return <section className="panel"><div className="panel-heading"><h2>Upcoming trains</h2><button className="refresh-button" type="button" onClick={refresh} disabled={loading || refreshing}>{(loading || refreshing) && data ? 'Refreshing…' : 'Refresh'}</button></div>
+    {loading && !data && <p role="status">Loading arrivals…</p>}
     {error && <p role="alert" className="error">{error} {data && 'Showing the last successful response.'}</p>}
-    {data && <><p className="muted">Sample data · updated {new Date(data.updated_at).toLocaleTimeString()}</p>
-    <div className="arrivals">{data.arrivals.map(arrival => <div className="arrival" key={arrival.id}><span className="route">{arrival.route_id}</span><div><strong>{arrival.destination}</strong><small>{arrival.direction}</small></div><b>{Math.max(0, Math.ceil((new Date(arrival.arrival_time) - Date.now()) / 60000))} min</b></div>)}</div>
-    {!data.arrivals.length && <p>No upcoming arrivals.</p>}</>}
+    {data && <>{sourceLabel && <p className={`muted source-label ${sourceClass}`}><span className="status-dot" aria-hidden="true" />{sourceLabel} · updated {formatUpdatedAt(data.updated_at)}</p>}
+    <div className="arrivals">{arrivals.map(arrival => <div className="arrival" key={arrival.id}><span className="route">{arrival.route_id}</span><div><strong>{arrival.destination}</strong><small>{arrival.direction}</small></div><b>{formatMinutes(arrival.arrival_time)}</b></div>)}</div>
+    {!arrivals.length && <p>No upcoming arrivals.</p>}</>}
   </section>;
 }
