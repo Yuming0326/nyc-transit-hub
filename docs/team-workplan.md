@@ -57,6 +57,13 @@ Each task below is a checklist item. S1 establishes its actual current state. Da
 | S6 | Request the team's Bus Time key, configure it on the backend, and validate a real bus request. | Yuming | None | Real request succeeds; key remains out of git/frontend. |
 | S7 | Confirm hosting budget/accounts/access and environment responsibilities; establish service URLs. | Member 2 + Zhaorui | None | Each deployment owner can access their platform; no unapproved spend. |
 
+**S5 remains open.** Verify station switching, automatic and manual refresh, and
+error states in the browser. Investigate the subway 503 responses and confirm
+successful live arrivals and alerts in the browser. The 503s do not establish
+whether the cause is MTA availability, network restrictions, or backend handling.
+Finish these checks before closing S5 or presenting a live demo. S6 can proceed
+independently.
+
 **Parallel now:** S5, S6, S7, Firebase setup, and initial deployment.  
 **Agree before dependent feature work:** S3 and S4. Do not wait for every API to finish before developing frontend fixtures.
 

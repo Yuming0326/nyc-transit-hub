@@ -1,5 +1,9 @@
 # API contract (v0)
 
+Setup owner: Yuming. Subway endpoints below are implemented. The proposed bus
+contract and shared identifiers are documented in [shared setup](shared-setup.md).
+Bus endpoints are not implemented yet; examples there are synthetic fixtures.
+
 All paths begin with `/api`. Errors use `{ "error": "message" }`. Times use ISO 8601 UTC. Transit responses include `source: "demo"` in demo mode or `source: "mta"` in live mode. Existing response fields are unchanged. Breaking field changes require agreement with frontend owners.
 
 | Method | Path | Response |

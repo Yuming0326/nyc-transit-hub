@@ -1,3 +1,5 @@
+import React from 'react';
+
 export default function StationSearch({ query, onChange, stations, selected, onSelect }) {
   return <section className="panel"><h2>Find a station</h2>
     <label htmlFor="station-search">Station name or subway line</label>
