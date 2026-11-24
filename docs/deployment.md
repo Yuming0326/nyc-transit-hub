@@ -1,5 +1,18 @@
 # S7 deployment setup
 
+Updated: November 24, 2026. **S7 complete.**
+
+Yuming completed the initial setup. Ongoing deployment responsibility is shared
+by Yuming, Zachary, and Zhaorui.
+
+| Setting | Configured value |
+| --- | --- |
+| Frontend | https://nyc-transit-hub-web.onrender.com |
+| Backend | https://nyc-transit-hub-yp6g.onrender.com |
+| Deployment branch | `setup/shared-setup` |
+| Firebase project | `nyc-transit-hub-9d406` |
+| Auto-Deploy | Off for both Render services |
+
 Render Static Site serves the Vite build over HTTPS through a CDN. The frontend
 already builds to static files, and keeping both services on Render gives the
 team one hosting dashboard. A Render Python Web Service runs Flask under
@@ -13,16 +26,15 @@ project. Free web services spin down after 15 minutes of inactivity and can take
 about a minute to resume. Exercise the app before a live presentation and check
 how the frontend behaves after a cold start. The backend filesystem is ephemeral.
 The tracked generated subway catalog ships with the backend, the in-memory cache
-rebuilds on demand, and favorites persist in Firestore. Check workspace usage and
-access before creating services. Any paid upgrade needs separate approval.
+rebuilds on demand, and favorites persist in Firestore. Check workspace usage before creating services. Discuss any paid upgrade with the team before changing the course hosting plan.
 
 ## Render dashboard settings
 
 | Field | Static Site | Web Service |
 | --- | --- | --- |
-| Suggested name | `nyc-transit-hub` | `nyc-transit-hub-api` |
+| Service name | `nyc-transit-hub-web` | `nyc-transit-hub-yp6g` |
 | Repository | NYC Transit Hub GitHub repository | Same repository |
-| Branch | `main`, once it contains the reviewed deployment revision | Same reviewed branch |
+| Branch | `setup/shared-setup` | `setup/shared-setup` |
 | Root Directory | `frontend` | `backend` |
 | Language / Runtime | Static Site | Python 3 |
 | Build Command | `npm ci && npm run build` | `pip install -r requirements.txt` |
@@ -40,18 +52,18 @@ gunicorn --workers 1 --threads 4 --bind 0.0.0.0:$PORT --timeout 120 'app:create_
 
 Render supplies `PORT`. The browser fetches the API directly by its public
 origin. The dashboard currently renders at `/`, so no static rewrite is needed.
-Creating the services starts their first deploy. Wait until the reviewed revision
-is available on the selected remote branch.
+Both services are configured. With Auto-Deploy off, deploy the intended revision
+manually from `setup/shared-setup`.
 
 ### Frontend build environment
 
 | Name | Value |
 | --- | --- |
 | `NODE_VERSION` | `22.21.0` |
-| `VITE_API_BASE_URL` | Actual backend HTTPS origin, without `/api` or a trailing slash |
+| `VITE_API_BASE_URL` | `https://nyc-transit-hub-yp6g.onrender.com` |
 | `VITE_FIREBASE_API_KEY` | Existing Firebase web app `apiKey` |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Existing Firebase web app `authDomain` |
-| `VITE_FIREBASE_PROJECT_ID` | Existing Firebase web app `projectId` |
+| `VITE_FIREBASE_PROJECT_ID` | `nyc-transit-hub-9d406` |
 | `VITE_FIREBASE_APP_ID` | Existing Firebase web app `appId` |
 
 Vite embeds these values in the browser bundle. Rebuild after changing them.
@@ -63,9 +75,9 @@ Keep private credentials exclusively on the backend.
 | --- | --- |
 | `PYTHON_VERSION` | `3.12.12` (deployment target, pending verification on Render) |
 | `TRANSIT_MODE` | `live` for deployed verification |
-| `FRONTEND_ORIGIN` | Exact frontend HTTPS origin, without a trailing slash |
+| `FRONTEND_ORIGIN` | `https://nyc-transit-hub-web.onrender.com` |
 | `MTA_BUS_TIME_API_KEY` | Existing Bus Time key, entered as a backend environment variable |
-| `FIREBASE_PROJECT_ID` | Same Firebase project ID used by the frontend |
+| `FIREBASE_PROJECT_ID` | `nyc-transit-hub-9d406` |
 | `GOOGLE_APPLICATION_CREDENTIALS` | `/etc/secrets/firebase-service-account.json` |
 
 In the backend's **Environment → Secret Files**, add the Firebase service-account
@@ -75,8 +87,8 @@ and freshness settings at their application defaults.
 
 In the existing Firebase project, verify that Google is enabled under
 **Authentication → Sign-in method** and add the frontend hostname under
-**Authentication → Settings → Authorized domains**. Confirm the deployed Firestore
-rules match `firestore.rules`, which denies direct client access. Flask verifies
+**Authentication → Settings → Authorized domains**. Keep restrictive Firestore rules that deny direct client access, as in
+`firestore.rules`. Flask verifies
 the Firebase ID token for favorites, then uses the Admin SDK for Firestore.
 
 ## Local verification
@@ -90,51 +102,65 @@ the Firebase ID token for favorites, then uses the Admin SDK for Firestore.
 - The backend virtual environment has Python 3.10.9 and Gunicorn 26.2.0.
   Yuming confirmed that Gunicorn's config check for `app:create_app()` passed,
   the server started on `127.0.0.1:5002`, and `GET /api/health` passed on that
-  port. The Render Python 3.12.12 target and hosted checks remain pending.
+  port. The effective Render Python runtime remains to be confirmed.
 
-## Hosted account verification — November 24, 2026
+### Local account and favorites checks
 
-- **Google sign-in: verified.** Yuming confirmed Google sign-in on Render;
-  inspection of https://nyc-transit-hub-web.onrender.com/ showed the signed-in
-  “Sign out” control. This does not verify canceled sign-in or user isolation.
-- **Favorites: pending.** The hosted Save current station button exists, but
-  appears below all 499 stations. Saving 231 St initially displayed a saved
-  station and Remove current station. After reload, the saved item was not
-  restored in the observed UI; a subsequent save remained pending. Hosted
-  persistence, removal, saved-station selection, and user isolation are not
-  marked verified. The backend used by this page is
-  https://nyc-transit-hub-yp6g.onrender.com/; deployed revision was not checked.
-- Local fix places Saved stations and its save/remove control before station
-  search, identifies the selected station, and adds loading, bounded requests,
-  errors, and retry. Successful writes update the list; failed writes retain it.
-  Saved-station buttons select the station independently of the search filter.
-  Firebase session restoration triggers GET /api/favorites on reload. Storage
-  remains backend Firestore at users/{uid}/favorites/{station_id}; no browser
-  storage fallback is used.
-- Local production build and `cd frontend && npm test` pass. The frontend tests
-  use a simulated API store across component remounts to check persistence
-  integration, selection, removal, and error recovery; they do not establish
-  hosted Firestore persistence. These local changes have not been deployed.
+- **Favorites: passed, confirmed by Yuming.** This records the completed local
+  favorites check separately from the hosted result below.
+- Local production build and frontend tests also passed. The automated favorites
+  tests use a simulated API store and cover remount persistence, saved-station
+  selection, removal, and error recovery; they are separate from Yuming's check.
 
-To finish hosted verification after deploying the reviewed changes: sign in,
-select and save a station, select a different station, then select the saved
-station and confirm the arrivals heading changes. Reload and confirm the saved
-item remains; remove it, reload again, and confirm it stays removed. Check GET,
-POST, and DELETE /api/favorites responses and backend logs if a request fails or
-stalls; confirm the backend Firebase project and Firestore credentials match.
-Also verify account isolation with two users. Do not mark favorites complete
-until these hosted checks pass.
+## Hosted verification — November 24, 2026
 
-## Remaining S7 checks
+- **Deployment, live data, and CORS: passed, confirmed by Yuming.** These
+  completed checks support S7 closure alongside the account/favorites results.
 
-- Confirm Yuming's Render workspace and Firebase access. Record the project ID
-  and team access or the owner-operated deployment process.
-- Once deployment is authorized, record the actual service URLs and deployed
-  revision. Set both cross-service origins using the actual HTTPS URLs.
-- Verify hosted health, station catalog, browser CORS and preflight, and Google
-  favorites persistence and isolation (Google sign-in is verified above). Verify hosted MTA access.
-  Bus endpoints remain future adapter work. S5 browser and live subway checks
-  remain open independently.
+- **Account checks: passed, confirmed by Yuming.** Earlier Google sign-in evidence
+  is retained: inspection of https://nyc-transit-hub-web.onrender.com/ showed the
+  signed-in “Sign out” control.
+- **Favorites checks: passed, confirmed by Yuming.** This supersedes the earlier
+  unresolved save/reload observation; favorites are no longer an S7 blocker.
+  This records Yuming's completed checks, without claiming a new automated run
+  or extending the result to later account features.
+- **Earlier hosted connectivity evidence retained:** the frontend loaded the
+  499-station catalog, completed Google sign-in, and a save initially displayed a
+  saved station and the Remove current station control. The frontend used
+  https://nyc-transit-hub-yp6g.onrender.com/ as its backend. These observations
+  establish browser-to-backend connectivity for the observed workflows and are
+  not pending repeat checks. They do not identify the deployed revisions or
+  prove the effective dashboard configuration.
+- Saved stations and their controls are placed before station search; successful
+  writes update the list, failed writes retain it, and saved-station selection is
+  independent of the search filter. Firebase session restoration loads favorites
+  through the backend. Storage remains Firestore at
+  `users/{uid}/favorites/{station_id}`, with no browser-storage fallback.
+
+## S7 completion
+
+**Complete — November 24, 2026, based on Yuming's confirmed deployment, live data,
+CORS, Google sign-in, and favorites checks.** The earlier hosted connectivity
+observations above remain part of the evidence; no repeat checks are required to
+close S7. Initial setup was completed by Yuming, with ongoing deployment
+responsibility shared across all three teammates.
+
+Deployed commit recording, exact hosted runtime confirmation, cold-start testing,
+and exact matching of the deployed rules to the repository rules file are not S7
+completion requirements. They are not recorded as passed. Keep restrictive
+Firestore rules; do not enable direct client database access to make the app work.
+
+S5's unverified browser empty-state checks remain separate in
+[shared setup](shared-setup.md). Its local automated empty-state tests passed;
+S7 completion does not verify those browser checks.
+
+S4 interface definitions and [synthetic examples](examples/README.md) are complete.
+Bus API implementation and detailed bus-field validation remain later work.
+Reuse the existing services and Firebase project; B21 and the initial C20
+deployment are complete. B22 retains hosted bus-key access verification and
+configuration for future artifacts; no deployment change is made in this handoff.
+The later Y/B/C implementation and verification tasks, including broader account
+and multi-mode favorites coverage, remain separate from setup completion.
 
 ## References
 

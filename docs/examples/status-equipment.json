@@ -1,0 +1,180 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "service-status",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "statuses": [
+              {
+                "route_id": "R",
+                "status": "disruption",
+                "basis": "active_alerts",
+                "alert_ids": [
+                  "demo-alert"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "statuses": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        },
+        {
+          "name": "unknown_not_normal",
+          "request": {
+            "method": "GET",
+            "path": "/api/service-status?mode=subway&route_id=R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "statuses": [
+              {
+                "route_id": "R",
+                "status": "unknown",
+                "basis": "insufficient_coverage",
+                "alert_ids": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "operation": "equipment",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/equipment"
+          },
+          "status": 200,
+          "response": {
+            "station_id": "R20",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "partial",
+            "equipment": [
+              {
+                "id": "demo-elevator",
+                "type": "elevator",
+                "description": "Illustrative elevator",
+                "station_ids": [
+                  "R20"
+                ],
+                "status": "reported_outage",
+                "updated_at": "2026-11-24T15:00:00Z",
+                "return_to_service_at": null
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/equipment"
+          },
+          "status": 200,
+          "response": {
+            "station_id": "R20",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "unknown",
+            "equipment": []
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/equipment"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/equipment"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    }
+  ]
+}

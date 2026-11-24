@@ -1,0 +1,810 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "subscriptions-list",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/subscriptions",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "subscriptions": [
+              {
+                "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+                "target": {
+                  "type": "station",
+                  "mode": "subway",
+                  "id": "R20"
+                },
+                "enabled": true,
+                "created_at": "2026-11-24T15:00:00Z",
+                "updated_at": "2026-11-24T15:00:00Z"
+              }
+            ],
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/subscriptions",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "subscriptions": [],
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "GET",
+            "path": "/api/subscriptions"
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/subscriptions",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/subscriptions",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subscription-enable",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "target": {
+              "type": "station",
+              "mode": "subway",
+              "id": "R20"
+            },
+            "enabled": true,
+            "created_at": "2026-11-24T15:00:00Z",
+            "updated_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": true
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subscription-disable",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "target": {
+              "type": "station",
+              "mode": "subway",
+              "id": "R20"
+            },
+            "enabled": false,
+            "created_at": "2026-11-24T15:00:00Z",
+            "updated_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": false
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "PUT",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "enabled": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subscription-delete",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          }
+        },
+        {
+          "name": "no_change",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0"
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/subscriptions/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "notification-evaluate",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/notifications/evaluate",
+            "body": {},
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "created": 1,
+            "unread_count": 1,
+            "evaluated_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "no_change",
+          "request": {
+            "method": "POST",
+            "path": "/api/notifications/evaluate",
+            "body": {},
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "created": 0,
+            "unread_count": 0,
+            "evaluated_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/notifications/evaluate",
+            "body": {}
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/notifications/evaluate",
+            "body": {},
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/notifications/evaluate",
+            "body": {},
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "notifications-list",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/notifications?unread_only=true",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "notifications": [
+              {
+                "id": "9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+                "alert_id": "demo-alert",
+                "revision": "34f1fcc45af328139257c19b1d95d29a6e3fa281599f5f457907efff0f27d0a2",
+                "title": "Illustrative disruption",
+                "body": "Synthetic notice",
+                "targets": [
+                  {
+                    "type": "route",
+                    "mode": "subway",
+                    "id": "R"
+                  }
+                ],
+                "created_at": "2026-11-24T15:00:00Z",
+                "read": false,
+                "read_at": null
+              }
+            ],
+            "unread_count": 1,
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/notifications?unread_only=true",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "notifications": [],
+            "unread_count": 0,
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "GET",
+            "path": "/api/notifications?unread_only=true"
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/notifications?unread_only=true",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/notifications?unread_only=true",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "notification-read",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "id": "9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "alert_id": "demo-alert",
+            "revision": "34f1fcc45af328139257c19b1d95d29a6e3fa281599f5f457907efff0f27d0a2",
+            "title": "Illustrative disruption",
+            "body": "Synthetic notice",
+            "targets": [
+              {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            ],
+            "created_at": "2026-11-24T15:00:00Z",
+            "read": true,
+            "read_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": true
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": true
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "notification-unread",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "id": "9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "alert_id": "demo-alert",
+            "revision": "34f1fcc45af328139257c19b1d95d29a6e3fa281599f5f457907efff0f27d0a2",
+            "title": "Illustrative disruption",
+            "body": "Synthetic notice",
+            "targets": [
+              {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            ],
+            "created_at": "2026-11-24T15:00:00Z",
+            "read": false,
+            "read_at": null
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": false
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "PATCH",
+            "path": "/api/notifications/9eacc4aced72dffd4d19386b8b3073dd3babc3caae45c630440f6a1be56ea41e",
+            "body": {
+              "read": false
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    }
+  ]
+}

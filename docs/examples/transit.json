@@ -1,0 +1,1022 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "station-detail",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20"
+          },
+          "status": 200,
+          "response": {
+            "station": {
+              "id": "R20",
+              "name": "Illustrative station",
+              "routes": [
+                "R"
+              ],
+              "latitude": 40.735,
+              "longitude": -73.99
+            },
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z"
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subway-route-search",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes?search=R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "routes": [
+              {
+                "id": "R",
+                "name": "Illustrative R route",
+                "short_name": "R"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes?search=R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "routes": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes?search=R"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes?search=R"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes?search=R"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subway-route-detail",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes/R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "route": {
+              "id": "R",
+              "name": "Illustrative R route",
+              "short_name": "R"
+            },
+            "stations": [
+              {
+                "id": "R20",
+                "name": "Illustrative station",
+                "routes": [
+                  "R"
+                ],
+                "latitude": 40.735,
+                "longitude": -73.99
+              }
+            ]
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes/R"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/subway/routes/R"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-route-search",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes?search=B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "routes": [
+              {
+                "id": "MTA NYCT_B63",
+                "name": "Illustrative B63 route",
+                "short_name": "B63"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes?search=B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "routes": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes?search=B63"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes?search=B63"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes?search=B63"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-route-detail",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes/MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "route": {
+              "id": "MTA NYCT_B63",
+              "name": "Illustrative B63 route",
+              "short_name": "B63"
+            },
+            "stops": [
+              {
+                "id": "MTA_308214",
+                "name": "Illustrative B63 stop",
+                "latitude": 40.675,
+                "longitude": -73.983
+              }
+            ]
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes/MTA%20NYCT_B63"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/routes/MTA%20NYCT_B63"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-stop-search",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops?route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "route_id": "MTA NYCT_B63",
+            "stops": [
+              {
+                "id": "MTA_308214",
+                "name": "Illustrative B63 stop",
+                "latitude": 40.675,
+                "longitude": -73.983
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops?route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "route_id": "MTA NYCT_B63",
+            "stops": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops?route_id=MTA%20NYCT_B63"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops?route_id=MTA%20NYCT_B63"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops?route_id=MTA%20NYCT_B63"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-stop-detail",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "stop": {
+              "id": "MTA_308214",
+              "name": "Illustrative B63 stop",
+              "latitude": 40.675,
+              "longitude": -73.983
+            },
+            "route_ids": [
+              "MTA NYCT_B63"
+            ]
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subway-map",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=subway&route_id=R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "geometry": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        -73.99,
+                        40.735
+                      ],
+                      [
+                        -73.985,
+                        40.74
+                      ]
+                    ]
+                  },
+                  "properties": {
+                    "id": "demo-shape",
+                    "mode": "subway",
+                    "route_id": "R",
+                    "direction_id": null
+                  }
+                }
+              ]
+            },
+            "stations": [
+              {
+                "id": "R20",
+                "name": "Illustrative station",
+                "routes": [
+                  "R"
+                ],
+                "latitude": 40.735,
+                "longitude": -73.99
+              }
+            ],
+            "stops": []
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=subway&route_id=R"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "geometry": {
+              "type": "FeatureCollection",
+              "features": []
+            },
+            "stations": [],
+            "stops": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=subway&route_id=R"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=subway&route_id=R"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=subway&route_id=R"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-map",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=bus&route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "geometry": {
+              "type": "FeatureCollection",
+              "features": [
+                {
+                  "type": "Feature",
+                  "geometry": {
+                    "type": "LineString",
+                    "coordinates": [
+                      [
+                        -73.99,
+                        40.735
+                      ],
+                      [
+                        -73.985,
+                        40.74
+                      ]
+                    ]
+                  },
+                  "properties": {
+                    "id": "demo-shape",
+                    "mode": "bus",
+                    "route_id": "MTA NYCT_B63",
+                    "direction_id": null
+                  }
+                }
+              ]
+            },
+            "stations": [],
+            "stops": [
+              {
+                "id": "MTA_308214",
+                "name": "Illustrative B63 stop",
+                "latitude": 40.675,
+                "longitude": -73.983
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=bus&route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "geometry": {
+              "type": "FeatureCollection",
+              "features": []
+            },
+            "stations": [],
+            "stops": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=bus&route_id=MTA%20NYCT_B63"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=bus&route_id=MTA%20NYCT_B63"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/map?mode=bus&route_id=MTA%20NYCT_B63"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-arrivals",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214/arrivals?route_id=MTA%20NYCT_B63&direction_id=1"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "stop_id": "MTA_308214",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "arrivals": [
+              {
+                "id": "demo-bus-visit-1",
+                "route_id": "MTA NYCT_B63",
+                "route_name": "B63",
+                "direction_id": "1",
+                "destination": "Illustrative destination",
+                "arrival_time": "2026-11-24T15:05:00Z",
+                "vehicle_id": "demo-vehicle-1",
+                "recorded_at": "2026-11-24T14:59:55Z",
+                "distance_text": "5 stops away"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214/arrivals?route_id=MTA%20NYCT_B63&direction_id=1"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "stop_id": "MTA_308214",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "arrivals": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214/arrivals?route_id=MTA%20NYCT_B63&direction_id=1"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214/arrivals?route_id=MTA%20NYCT_B63&direction_id=1"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/stops/MTA_308214/arrivals?route_id=MTA%20NYCT_B63&direction_id=1"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-vehicles",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/vehicles?route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "vehicles": [
+              {
+                "id": "demo-vehicle-1",
+                "route_id": "MTA NYCT_B63",
+                "direction_id": "1",
+                "destination": null,
+                "latitude": 40.675,
+                "longitude": -73.983,
+                "bearing": null,
+                "recorded_at": "2026-11-24T15:00:00Z"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/vehicles?route_id=MTA%20NYCT_B63"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "vehicles": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/vehicles?route_id=MTA%20NYCT_B63"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/vehicles?route_id=MTA%20NYCT_B63"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/bus/vehicles?route_id=MTA%20NYCT_B63"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subway-affected-alerts",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=subway"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "route",
+            "alerts": [
+              {
+                "id": "demo-alert",
+                "header": "Illustrative disruption",
+                "description": "Synthetic notice",
+                "route_ids": [
+                  "R"
+                ],
+                "station_ids": [],
+                "stop_ids": [],
+                "scope": "route",
+                "impact": "disruption"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=subway"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "route",
+            "alerts": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=subway"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=subway"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=subway"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-affected-alerts",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=bus"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "route",
+            "alerts": [
+              {
+                "id": "demo-alert",
+                "header": "Illustrative disruption",
+                "description": "Synthetic notice",
+                "route_ids": [
+                  "MTA NYCT_B63"
+                ],
+                "station_ids": [],
+                "stop_ids": [],
+                "scope": "route",
+                "impact": "disruption"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=bus"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "coverage": "route",
+            "alerts": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=bus"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=bus"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/transit/alerts?mode=bus"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    }
+  ]
+}

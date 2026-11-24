@@ -1,31 +1,56 @@
 # Shared setup: subway and bus
 
 Owner: Yuming for S1–S7. Zachary and Zhaorui will receive later implementation
-tasks separately. This document records the setup decisions and proposed bus
-interface; it does not claim that bus support is implemented.
+tasks separately. This document records setup evidence and identifiers. The authoritative
+[API contract](api-contract.md) and [examples](examples/README.md) define all
+prepared interfaces; bus and other new feature endpoints are not implemented.
 
 ## Setup status
 
 | ID | Task | Status / completion check |
 | --- | --- | --- |
-| S1 | Review main and team branches | Repository review completed against main `4cc684b` and frontend `2362040`; 35 backend tests and both frontend builds passed. Browser and current upstream checks remain for S5. |
-| S2 | Assign setup owners | Yuming owns all S1–S7. Later implementation assignments remain open. |
+| S1 | Review main and team branches | Repository review completed against main `4cc684b` and frontend `2362040`; 35 backend tests and both frontend builds passed. Subsequent S5 verification is recorded below. |
+| S2 | Assign setup owners | Complete: Yuming handled S1–S7. Later implementation tasks will be divided among Yuming, Zachary, and Zhaorui; preserve the workplan breakdown. |
 | S3 | Agree on identifiers | Conventions below agreed. The keyed smoke check used the S4 stop mapping. |
-| S4 | Document requests and responses | Draft below with synthetic fixtures. The live smoke check confirmed delivery and ETA presence; detailed field validation and teammate review remain. |
-| S5 | Verify/integrate frontend | Dashboard fixes applied locally. Browser checks and live verification remain open (see below). |
+| S4 | Document requests and responses | Complete: all planned feature interfaces and synthetic success/empty/error examples defined in API contract and docs/examples. Detailed source validation remains later implementation work; no teammate acknowledgment is claimed. |
+| S5 | Verify/integrate frontend | Frontend changes integrated. Station switching, live display, manual/automatic refresh, timestamp behavior, and failure recovery tested. Local automated empty-state checks passed; browser empty-state checks remain unverified and separate from S7 (see below). |
 | S6 | Configure Bus Time key | Complete. Keyed StopMonitoring request succeeded from Yuming’s Mac using the backend environment. |
-| S7 | Deployment accounts/configuration | Render Static Site, Render Web Service, and existing Firebase selected. See [S7 deployment settings](deployment.md). Local Gunicorn config, startup, and health checks passed on port 5002 with Python 3.10.9. Hosted Google sign-in verified November 24, 2026; favorites and remaining hosted checks pending. See the hosted account verification record in deployment.md. |
+| S7 | Deployment configuration | Render frontend/backend and Firebase configured by Yuming; all three share ongoing deployment responsibility. Local favorites and hosted account/favorites checks passed, confirmed by Yuming. Earlier hosted connectivity evidence is retained in [deployment.md](deployment.md). S7 complete based on confirmed deployment, live data, CORS, Google sign-in, and favorites checks. |
 
-## S5 open verification
+## S5 verification
 
-- Check station switching, automatic and manual refresh, and error states in a browser.
-- If alerts 503 recurs, capture the backend warning and repeat the route check
-  below from the backend host. The November 24 investigation passed live checks;
-  the original intermittent failure remains unproven (see evidence below).
-- Confirm successful live arrivals and service alerts in the browser.
+Frontend changes are integrated. Station switching, live display, manual and
+automatic refresh, timestamp behavior, and failure recovery have been tested.
+These interaction checks are recorded separately from the backend checks below;
+they do not establish hosted verification or passing controlled empty states.
 
-Resolve all three before marking S5 complete or presenting a live demo. S6 Bus
-Time access can proceed independently.
+**S5 browser empty-state verification remains open.** Local controlled automated
+checks passed as recorded below. Browser checks for empty arrivals and empty
+alerts remain unverified; confirm each displays an empty message without an
+error before closing this remaining S5 verification item. This is separate from
+S7, which is complete.
+
+### Controlled empty-state results — November 24, 2026
+
+`frontend/tests/station-empty.test.js` supplies controlled successful HTTP 200 JSON
+responses with `arrivals: []` and `alerts: []` to the actual `useStationData` hook
+through a mocked API boundary. A lightweight hook harness drives loading and
+refresh; React renders the actual ArrivalBoard and ServiceAlerts components to
+HTML for assertions. These are local automated checks, not browser automation,
+hosted checks, or evidence of live MTA empty feeds.
+
+| Check | Result |
+| --- | --- |
+| Initial empty arrivals | Passed: “No upcoming arrivals.” appears; no error alert or loading message remains. |
+| Initial empty alerts | Passed: “No active service alerts for these routes.” appears; no error alert or loading message remains. |
+| Populated → successful empty refresh | Passed: previous train and alert content clears; both empty messages appear without errors. |
+| Failure → successful empty recovery | Passed: controlled failure first renders an error; subsequent empty success clears the error and displays both empty messages. |
+
+Validation: `npm test --prefix frontend` passed **4 tests**, including the two
+controlled station-data tests and the two existing favorites tests. These results
+verify the local automated cases, not browser empty-state checks. S7 is complete
+on its separate deployment evidence. If alerts 503
+recurs, retain the backend warning and correlate it with the request.
 
 ### Alerts 503 investigation — November 24, 2026
 
@@ -66,7 +91,9 @@ availability; invalid protobuf or incomplete snapshot indicates payload failure;
 the timestamp warning indicates freshness rejection. Verify effective
 `TRANSIT_MODE`, timeout settings, and `MTA_ALERTS_MAX_AGE_SECONDS` (default 600)
 without dumping `.env` or credentials. Restart the backend to load local diagnostic
-changes. Browser verification remains open; these checks do not complete S5.
+changes. Network-enabled requests resolved the observed restricted-run failure;
+the code change improved diagnostics rather than bypassing validation. These backend checks complement the interaction and controlled empty-state
+results above; they do not establish hosted S7 verification.
 
 ## S6 Bus Time access
 
@@ -95,7 +122,7 @@ within the freshness window. Four visits included an ETA and two lacked one.
 The summary confirms the listed journey fields were present. It does not show
 the exact returned stop or route IDs, route labels, per-visit timestamp values,
 distance text, or the fields needed to validate a stable visit ID. Those checks
-remain part of S4 field validation.
+remain assigned to Y4/Y10 adapter field validation; they do not block S4 definitions.
 
 ## Shared identifiers
 
@@ -124,9 +151,11 @@ do not strip arbitrary identifiers. Preserve the full `LineRef` as route_id and
 use `PublishedLineName` as route_name. Use the discovery response as the mapping
 authority rather than constructing route IDs from labels.
 
-Any future shared saved-location key must include mode and identifier, such as
-`(subway, R20)` or `(bus, MTA_308214)`. Existing subway favorites continue to use
-their existing station_id schema; a bus favorites migration is not defined here.
+Shared saved-item identity is `(mode,type,id)`, for example `(subway,station,R20)`
+or `(bus,stop,MTA_308214)`. Existing station favorites keep their schema. The
+[prepared v2 migration](api-contract.md#prepared-favorites-extension-and-migration)
+projects legacy stations and adds separate typed records without a destructive
+bulk migration. Its implementation remains B8.
 
 ## Existing subway requests
 
@@ -236,7 +265,42 @@ not "No arrivals". Manual refresh uses the same endpoint and filters.
 - [Bus Time journey fields](https://bustime-classic.mta.info/wiki/Developers/SIRIMonitoredVehicleJourney)
 - [Bus Time discovery API](https://app.prod.obanyc.com/developers/restful-api)
 
-Before implementing, Zachary and Zhaorui should review request/response shapes.
-During bus adapter implementation, validate remaining field mappings and
-timestamp/error semantics against keyed responses. Bus alerts, bus favorites, translation, and notifications
-need their own contracts when their later implementation tasks are scoped.
+## S4 handoff completion — November 24, 2026
+
+**Complete for interface definition.** [API contracts](api-contract.md) specify
+all planned public/private methods, paths, identifiers, filters/bodies, response
+shapes, errors, and station-favorites compatibility. [JSON examples](examples/README.md)
+cover existing endpoints and prepared search/details, maps, vehicles/arrivals,
+affected alerts, schedules/journeys, typed favorites, subscriptions/notifications,
+status and equipment. Y6 initial response-fixture delivery, B7 saved-item/migration
+definition, and B12/B19 read-state/API definition portions are complete.
+No new endpoint implementation or live validation is claimed. Interface review
+can accompany handoff; teammate acknowledgment has not been recorded.
+
+The current implementation preserves station-only favorites, Google account
+controls/session listener, all-station-route alert filtering, and the subway
+polling/timeout/cleanup flow. Reconciled B/C task portions are recorded in the
+[workplan](team-workplan.md); retain broader verification and new features.
+
+### Remaining follow-ups and source checks
+
+- **S5 browser follow-up:** separately demonstrate successful empty arrivals and
+  alerts in the browser. Local automated cases already passed. This does not
+  reopen S7 or prevent interface-based development.
+- **Y4/Y10:** confirm actual bus route/stop IDs, route labels, stable visit identity,
+  nullable ETA/distance, per-visit timestamps, vehicle positions/bearing, SIRI
+  errors and freshness behavior against keyed responses.
+- **Y9/Y11/B17:** validate actual bus alert access and affected-route/stop/station
+  associations before precise matching and notifications.
+- **Y3–Y5/Y14–Y23:** validate geometry, agency mapping, schedules/calendars,
+  overnight/DST handling, transfers and routing coverage.
+- **B13/B15–B16:** validate authoritative status fields, equipment source access,
+  inventory completeness and station mappings. Unsupported evidence remains
+  unknown/unavailable, never a false normal/accessible claim.
+- **B22:** verify hosted bus-key access and add new data/configuration when features
+  are implemented. S6 local access and S7 current deployment remain complete.
+
+No concrete credential/access blocker to the completed shared setup is recorded.
+These source checks are later implementation validation, not unfinished S4
+interface definitions. The next coordination gate is the shared Git baseline;
+no commit, push, merge, deployment or implementation branch is created here.

@@ -1,3 +1,5 @@
+> Historical implementation handoff, archived November 24, 2026. Status and task ownership below describe the earlier delivery. See [current MTA data reference](../../mta-data.md).
+
 # MTA data owner handoff
 
 Role 2 integration update: this local delivery now wires the adapter through the existing Flask APIs with per-URL validated feed caching, app-local catalogs, configurable timeouts/freshness, explicit 503 errors, and 35 passing offline tests. See [backend handoff](backend-handoff.zh-CN.md) and the saved online verification report. The original role 1 handoff below records its prior delivery state; it is not a claim that integration is still missing. Team merge/approval and full frontend integration remain pending.

@@ -1,0 +1,411 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "subway-schedule",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": [
+              {
+                "id": "demo-departure",
+                "trip_id": "demo-trip",
+                "route_id": "R",
+                "direction_id": "1",
+                "destination": null,
+                "stop_sequence": 1,
+                "service_time": "10:05:00",
+                "departure_time": "2026-11-24T15:05:00Z"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "bus-schedule",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": [
+              {
+                "id": "demo-departure",
+                "trip_id": "demo-trip",
+                "route_id": "MTA NYCT_B63",
+                "direction_id": "1",
+                "destination": null,
+                "stop_sequence": 1,
+                "service_time": "10:05:00",
+                "departure_time": "2026-11-24T15:05:00Z"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "journey-plan",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R21"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 200,
+          "response": {
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "timing_basis": "schedule",
+            "optimization": "fewest_transfers",
+            "journeys": [
+              {
+                "id": "demo-journey",
+                "departure_time": "2026-11-24T15:00:00Z",
+                "arrival_time": "2026-11-24T15:05:00Z",
+                "duration_seconds": 300,
+                "transfers": 0,
+                "legs": [
+                  {
+                    "mode": "subway",
+                    "route_id": "R",
+                    "from": {
+                      "type": "station",
+                      "mode": "subway",
+                      "id": "R20"
+                    },
+                    "to": {
+                      "type": "station",
+                      "mode": "subway",
+                      "id": "R21"
+                    },
+                    "departure_time": "2026-11-24T15:00:00Z",
+                    "arrival_time": "2026-11-24T15:05:00Z",
+                    "duration_seconds": 300,
+                    "stop_ids": [
+                      "R20",
+                      "R21"
+                    ]
+                  }
+                ]
+              }
+            ],
+            "no_path_reason": null
+          }
+        },
+        {
+          "name": "no_path",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R21"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 200,
+          "response": {
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "timing_basis": "schedule",
+            "optimization": "fewest_transfers",
+            "journeys": [],
+            "no_path_reason": "no_service_in_window"
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R21"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R21"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R21"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        },
+        {
+          "name": "same_endpoint",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 200,
+          "response": {
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "timing_basis": "schedule",
+            "optimization": "fewest_transfers",
+            "journeys": [
+              {
+                "id": "demo-same-endpoint",
+                "departure_time": "2026-11-24T15:00:00Z",
+                "arrival_time": "2026-11-24T15:00:00Z",
+                "duration_seconds": 0,
+                "transfers": 0,
+                "legs": []
+              }
+            ],
+            "no_path_reason": null
+          }
+        }
+      ]
+    }
+  ]
+}
