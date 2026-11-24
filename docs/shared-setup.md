@@ -14,18 +14,59 @@ interface; it does not claim that bus support is implemented.
 | S4 | Document requests and responses | Draft below with synthetic fixtures. The live smoke check confirmed delivery and ETA presence; detailed field validation and teammate review remain. |
 | S5 | Verify/integrate frontend | Dashboard fixes applied locally. Browser checks and live verification remain open (see below). |
 | S6 | Configure Bus Time key | Complete. Keyed StopMonitoring request succeeded from Yuming’s Mac using the backend environment. |
-| S7 | Deployment accounts/configuration | Render Static Site, Render Web Service, and existing Firebase selected. See [S7 deployment settings](deployment.md). Local Gunicorn config, startup, and health checks passed on port 5002 with Python 3.10.9. Hosted setup and verification remain pending. |
+| S7 | Deployment accounts/configuration | Render Static Site, Render Web Service, and existing Firebase selected. See [S7 deployment settings](deployment.md). Local Gunicorn config, startup, and health checks passed on port 5002 with Python 3.10.9. Hosted Google sign-in verified November 24, 2026; favorites and remaining hosted checks pending. See the hosted account verification record in deployment.md. |
 
 ## S5 open verification
 
 - Check station switching, automatic and manual refresh, and error states in a browser.
-- Investigate the subway arrivals and alerts HTTP 503 responses. The cause remains
-  undetermined among upstream MTA availability, network restrictions, and backend
-  handling.
+- If alerts 503 recurs, capture the backend warning and repeat the route check
+  below from the backend host. The November 24 investigation passed live checks;
+  the original intermittent failure remains unproven (see evidence below).
 - Confirm successful live arrivals and service alerts in the browser.
 
 Resolve all three before marking S5 complete or presenting a live demo. S6 Bus
 Time access can proceed independently.
+
+### Alerts 503 investigation — November 24, 2026
+
+- At approximately 12:44 EST, `GET http://127.0.0.1:5002/api/alerts?route_id=R`
+  returned HTTP 200, `source: mta`, and one current R-line alert. The existing
+  server writes stdout/stderr to `/dev/ttys005`, not a retained log file; historical
+  warnings were not available for inspection. Fresh backend requests and their
+  warning output were inspected directly instead.
+- In the restricted workspace, the same Flask route returned 503. Its exception
+  chain was `MTAError → ConnectionError → MaxRetryError → NameResolutionError →
+  gaierror`: DNS failed before an HTTP response or protobuf parsing. Both arrivals
+  requests also failed in that environment. This explains the restricted-run
+  failures, but does not establish the cause of earlier alerts-only failures.
+- With network access, `scripts/check_live_api.py` passed twice: health, station
+  search, R20 arrivals, A32 arrivals, and R-filtered alerts all returned 200 with
+  expected CORS headers. Live feeds passed protobuf, full-snapshot, and timestamp
+  validation using the existing configuration. No endpoint, timeout, or freshness
+  limit change was needed; this does not rule out intermittent upstream failures.
+- Backend warnings now distinguish upstream HTTP status, timeout class,
+  network/request exception class, invalid protobuf, incomplete snapshot, and
+  freshness failure. Raw request exception text stays out of warning messages;
+  clients still receive the generic JSON error and HTTP 503. No demo fallback or
+  stale-data bypass was added. Failed feeds remain uncached.
+- Validation: `cd backend && .venv/bin/python -m pytest -q` passed **39 tests**,
+  including cached-alert freshness and diagnostic regression checks. Use
+  `python -m pytest`: the local `.venv/bin/pytest` launcher references an old path.
+
+To reproduce, run from `backend/` with network access:
+
+```sh
+.venv/bin/python scripts/check_live_api.py
+curl --include --max-time 20 'http://127.0.0.1:5002/api/alerts?route_id=R'
+```
+
+For a recurrence, retain backend stderr and correlate the warning with the
+request time. A timeout/network/HTTP warning indicates transport or upstream
+availability; invalid protobuf or incomplete snapshot indicates payload failure;
+the timestamp warning indicates freshness rejection. Verify effective
+`TRANSIT_MODE`, timeout settings, and `MTA_ALERTS_MAX_AGE_SECONDS` (default 600)
+without dumping `.env` or credentials. Restart the backend to load local diagnostic
+changes. Browser verification remains open; these checks do not complete S5.
 
 ## S6 Bus Time access
 

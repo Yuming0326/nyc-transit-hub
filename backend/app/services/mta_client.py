@@ -35,10 +35,19 @@ def fetch_feed(feed_url, *, timeout=(3.05, 10), max_age=120, now=None, session=N
     try:
         response = (session or requests).get(feed_url, timeout=timeout)
         response.raise_for_status()
+    except requests.HTTPError as exc:
+        status = exc.response.status_code if exc.response is not None else response.status_code
+        raise MTAError(f'MTA upstream HTTP failure (status={status})') from exc
+    except requests.Timeout as exc:
+        raise MTAError(f'MTA upstream timeout ({type(exc).__name__})') from exc
+    except requests.RequestException as exc:
+        # Do not log exception text: it can contain request URLs or credentials.
+        raise MTAError(f'MTA upstream network/request failure ({type(exc).__name__})') from exc
+    try:
         feed = rt.FeedMessage()
         feed.ParseFromString(response.content)
-    except (requests.RequestException, DecodeError) as exc:
-        raise MTAError('MTA request failed or returned invalid protobuf') from exc
+    except DecodeError as exc:
+        raise MTAError('MTA upstream returned invalid protobuf') from exc
     if not feed.IsInitialized() or feed.header.incrementality != rt.FeedHeader.FULL_DATASET:
         raise MTAError('Expected a complete GTFS-RT snapshot')
     validate_freshness(feed, max_age=max_age, now=now)
