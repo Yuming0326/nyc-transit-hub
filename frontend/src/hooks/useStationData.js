@@ -8,6 +8,7 @@ const initialState = { data: null, error: '', loading: true };
 export function useStationData(station) {
   const [arrivals, setArrivals] = useState(initialState);
   const [alerts, setAlerts] = useState(initialState);
+  const [lastRefreshed, setLastRefreshed] = useState(null);
   const refreshRef = useRef(null);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export function useStationData(station) {
         }
         if (!controller.signal.aborted) {
           setState({ data: { ...data, [field]: selectRows(data[field]) }, error: '', loading: false });
+          return true;
         }
       } catch (error) {
         if (!controller.signal.aborted) {
@@ -33,18 +35,22 @@ export function useStationData(station) {
           setState(previous => ({ ...previous, error: message, loading: false }));
         }
       }
+      return false;
     }
 
     async function refresh() {
       if (pending || controller.signal.aborted) return;
       clearTimeout(refreshTimer);
       pending = true;
-      await Promise.all([
+      const results = await Promise.all([
         load(`/stations/${encodeURIComponent(station.id)}/arrivals`, 'arrivals', setArrivals, rows => rows),
         load('/alerts', 'alerts', setAlerts, rows => rows.filter(alert =>
           alert.route_ids.length === 0 || alert.route_ids.some(route => station.routes.includes(route))
         )),
       ]);
+      if (!controller.signal.aborted && results.every(Boolean)) {
+        setLastRefreshed(new Date().toISOString());
+      }
       pending = false;
       if (!controller.signal.aborted) refreshTimer = setTimeout(refresh, REFRESH_INTERVAL);
     }
@@ -58,5 +64,5 @@ export function useStationData(station) {
     };
   }, [station]);
 
-  return { arrivals, alerts, refresh: () => refreshRef.current?.() };
+  return { arrivals, alerts, lastRefreshed, refresh: () => refreshRef.current?.() };
 }
