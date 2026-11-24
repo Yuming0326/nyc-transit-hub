@@ -125,6 +125,21 @@ def test_http_error_is_not_empty_success():
         fetch_feed('https://example.test', session=session, now=NOW)
 
 
+@pytest.mark.parametrize('failure,diagnostic', [
+    (requests.ConnectionError('private URL'), 'network/request failure (ConnectionError)'),
+    (requests.ReadTimeout('private URL'), 'upstream timeout (ReadTimeout)'),
+    (requests.HTTPError('private URL', response=Mock(status_code=503)), 'HTTP failure (status=503)'),
+])
+def test_request_diagnostics_distinguish_failures_without_private_details(failure, diagnostic):
+    session = Mock()
+    session.get.side_effect = failure
+    with pytest.raises(MTAError, match=r'MTA') as caught:
+        fetch_feed('https://example.test', session=session, now=NOW)
+    assert diagnostic in str(caught.value)
+    assert 'private' not in str(caught.value)
+    assert caught.value.__cause__ is failure
+
+
 def test_official_feed_group_regressions():
     from app.services.mta_client import FEED_ROUTES
     assert '7' in FEED_ROUTES['gtfs']

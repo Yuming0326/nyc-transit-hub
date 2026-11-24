@@ -1,0 +1,705 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "v2-list",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": [
+              {
+                "id": "0afd249245ce5938cb2657ee32127266bc518b9b3f7079fd83ab227224afdbf2",
+                "target": {
+                  "type": "route",
+                  "mode": "subway",
+                  "id": "R"
+                }
+              },
+              {
+                "id": "4c2acaf86eb489f63e38be5cd600ba032bdf8bbb8218b73d346e29b243cc6dcc",
+                "target": {
+                  "type": "stop",
+                  "mode": "bus",
+                  "id": "MTA_308214"
+                }
+              },
+              {
+                "id": "aaa9c7ce9e21de3fb07bcd3698fc288858505f1a52e09981b4dc31531f9dd5d2",
+                "target": {
+                  "type": "route",
+                  "mode": "bus",
+                  "id": "MTA NYCT_B63"
+                }
+              },
+              {
+                "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+                "target": {
+                  "type": "station",
+                  "mode": "subway",
+                  "id": "R20"
+                }
+              }
+            ],
+            "next_cursor": null
+          },
+          "fixture_state": "Legacy favorites/R20 plus saved_items for the three non-station targets. V2 projects the legacy station without copying or deleting it."
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": [],
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites"
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        },
+        {
+          "name": "legacy_projection_only",
+          "fixture_state": "Only users/<uid>/favorites/R20 exists, with station_id R20; saved_items is empty. Existing GET /api/favorites returns {favorites:[{station_id:\"R20\"}]}.",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": [
+              {
+                "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+                "target": {
+                  "type": "station",
+                  "mode": "subway",
+                  "id": "R20"
+                }
+              }
+            ],
+            "next_cursor": null
+          }
+        },
+        {
+          "name": "legacy_delete_visible_in_v2",
+          "fixture_state": "After legacy DELETE /api/favorites/R20, only the previously saved bus stop remains in saved_items. The legacy GET returns favorites:[].",
+          "request": {
+            "method": "GET",
+            "path": "/api/v2/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": [
+              {
+                "id": "4c2acaf86eb489f63e38be5cd600ba032bdf8bbb8218b73d346e29b243cc6dcc",
+                "target": {
+                  "type": "stop",
+                  "mode": "bus",
+                  "id": "MTA_308214"
+                }
+              }
+            ],
+            "next_cursor": null
+          }
+        }
+      ]
+    },
+    {
+      "operation": "v2-save-subway-station",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 201,
+          "response": {
+            "id": "ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "target": {
+              "type": "station",
+              "mode": "subway",
+              "id": "R20"
+            }
+          },
+          "fixture_state": "Legacy station R20 absent: v2 POST writes favorites/R20. Repeating either v0 or v2 POST still yields one station; legacy GET sees R20 immediately."
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              }
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "v2-save-bus-stop",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 201,
+          "response": {
+            "id": "4c2acaf86eb489f63e38be5cd600ba032bdf8bbb8218b73d346e29b243cc6dcc",
+            "target": {
+              "type": "stop",
+              "mode": "bus",
+              "id": "MTA_308214"
+            }
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              }
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "v2-save-bus-route",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "bus",
+                "id": "MTA NYCT_B63"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 201,
+          "response": {
+            "id": "aaa9c7ce9e21de3fb07bcd3698fc288858505f1a52e09981b4dc31531f9dd5d2",
+            "target": {
+              "type": "route",
+              "mode": "bus",
+              "id": "MTA NYCT_B63"
+            }
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "bus",
+                "id": "MTA NYCT_B63"
+              }
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "bus",
+                "id": "MTA NYCT_B63"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "bus",
+                "id": "MTA NYCT_B63"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "bus",
+                "id": "MTA NYCT_B63"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "v2-save-subway-route",
+      "implementation": "prepared",
+      "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 201,
+          "response": {
+            "id": "0afd249245ce5938cb2657ee32127266bc518b9b3f7079fd83ab227224afdbf2",
+            "target": {
+              "type": "route",
+              "mode": "subway",
+              "id": "R"
+            }
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "Invalid request."
+          },
+          "condition": "Replace required field/filter with an invalid value; see operation contract."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Entity not found."
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/v2/favorites",
+            "body": {
+              "target": {
+                "type": "route",
+                "mode": "subway",
+                "id": "R"
+              }
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "v2-delete",
+      "implementation": "prepared",
+      "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/v2/favorites/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          },
+          "fixture_state": "Legacy station R20 exists: deleting its derived v2 favorite ID deletes favorites/R20, so the old station-only list also becomes empty."
+        },
+        {
+          "name": "no_change",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/v2/favorites/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/v2/favorites/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0"
+          },
+          "status": 401,
+          "response": {
+            "error": "Invalid or expired Firebase token."
+          },
+          "condition": "Omit token or supply an invalid token."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/v2/favorites/ced1a7dd024933d7a517341b15bf1a20df9f92b981ace233c07aaf263d3726d0",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Service temporarily unavailable."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    }
+  ]
+}

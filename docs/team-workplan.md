@@ -4,18 +4,18 @@ Updated: November 24, 2026
 Final presentation: November 30, 2026  
 Delivery: deployed web application
 
-This plan replaces the previous four-member checkpoint plan. It describes remaining delivery work and the final feature target; it does not certify that old tasks are complete. During S1, verify the current implementation and skip tasks already satisfied by evidence.
+This plan replaces the previous four-member checkpoint plan. It describes remaining delivery work and the final feature target; it does not certify that old tasks are complete. S1–S7 foundations are reconciled below against the current code and recorded evidence. Reuse completed portions; verify only remaining extensions and regressions.
 
 ## 1. Team ownership
 
-| Member | Primary ownership | Responsibilities |
+| Owner | Primary ownership | Responsibilities |
 | --- | --- | --- |
-| **Member 1 — Yuming Lin** | Transit data, routing, technical integration | Static imports; shared identifiers and API contracts; subway/bus feed integration; schedules; routing; integration reviews and deployed transit verification |
-| **Member 2 — name to confirm** | Accounts, personalized features, supporting APIs, backend deployment | Firebase; favorites; subscriptions; in-app notifications; service-status and equipment APIs; hosted Flask backend |
-| **Member 3 — Zhaorui** | Frontend, visualization, frontend deployment | Existing frontend integration; map; search and transit details; dashboard; journey planner; account and notification UI; languages; responsive layout; hosted frontend |
+| **Yuming** | Transit data, routing, technical integration | Static imports; shared identifiers and API contracts; subway/bus feed integration; schedules; routing; integration reviews and deployed transit verification |
+| **Zachary** | Accounts, personalized features, supporting APIs, backend deployment | Firebase; favorites; subscriptions; in-app notifications; service-status and equipment APIs; hosted Flask backend |
+| **Zhaorui** | Frontend, visualization, frontend deployment | Existing frontend integration; map; search and transit details; dashboard; journey planner; account and notification UI; languages; responsive layout; hosted frontend |
 | **All three** | Quality and final presentation | Test owned features, resolve integration defects, document behavior, prepare evidence, and rehearse |
 
-Yuming coordinates integration; each owner implements and verifies their own work. Member 2 owns equipment retrieval and status/equipment endpoints, with Yuming supplying shared mappings and helping interpret transit data. Zhaorui owns shared frontend request/refresh code; coordinate changes with Yuming instead of editing it independently.
+Yuming coordinates integration; each owner implements and verifies their own work. Zachary owns equipment retrieval and status/equipment endpoints, with Yuming supplying shared mappings and helping interpret transit data. Zhaorui owns shared frontend request/refresh code; coordinate changes with Yuming instead of editing it independently.
 
 ## 2. Agreed final scope
 
@@ -43,22 +43,31 @@ Task states: **Not started → In progress → Ready for integration → Verifie
 
 For import/library tasks, first verify reproducible outputs and tests; verify their dependent application behavior on deployment before closing the feature. Record evidence such as a commit/PR, test result, response example, or deployed workflow result. “Code exists” is not the same as “finished.”
 
-Each task below is a checklist item. S1 establishes its actual current state. Dates are targets, not evidence of completion.
+Each task below is a checklist item. The setup record captures the reviewed state. Dates are targets, not evidence of completion.
 
 ## 4. Shared setup — first priority
 
 | ID | Small task | Primary owner | Depends on | Completion check |
 | --- | --- | --- | --- | --- |
-| S1 | Review main, the frontend branch, newer changes, available credentials, and existing deployment. Mark every feature complete/partial/missing with evidence. | Yuming coordinates; all | None | Current status and blockers are recorded; existing work is reused. |
-| S2 | Confirm the three owners, Member 2's name, availability, and task handoffs. | All | S1 | Every remaining task has a primary owner. |
-| S3 | Agree on namespaces for subway parent/platform IDs, bus stop IDs, routes, agencies, and transit modes. | Yuming | S1 | Examples prevent cross-mode ID collisions and mapping ambiguity. |
-| S4 | Document requests, fields, sources/timestamps, and success/empty/error examples for each new API; preserve existing callers. | Yuming leads; all review | S3 | Backend and frontend can implement the same contracts independently. |
-| S5 | Verify the existing frontend branch with live Flask, fix blockers, and integrate through a reviewed change. | Zhaorui; Yuming reviews | S1 | Source labels, station selection, refresh, and error behavior work. |
-| S6 | Request the team's Bus Time key, configure it on the backend, and validate a real bus request. | Yuming | None | Real request succeeds; key remains out of git/frontend. |
-| S7 | Confirm hosting budget/accounts/access and environment responsibilities; establish service URLs. | Member 2 + Zhaorui | None | Each deployment owner can access their platform; no unapproved spend. |
+| S1 | Review repository and branches. | Yuming | None | Complete: repository and branch review recorded in [shared setup](shared-setup.md). |
+| S2 | Confirm setup ownership and later handoffs. | Yuming | S1 | Complete: Yuming handled S1–S7. Later implementation work will be divided among Yuming, Zachary, and Zhaorui using the breakdown below. |
+| S3 | Agree on shared identifiers. | Yuming | S1 | Complete: subway parent/platform, bus stop/route, and transit-mode conventions agreed. |
+| S4 | Draft API requests and success/empty/error responses. | Yuming | S3 | Complete: methods, identifiers, bodies, responses, migration and synthetic success/empty/error examples prepared in API contract/examples. Source validation remains implementation work. |
+| S5 | Integrate and verify existing frontend with live Flask. | Yuming | S1 | Integrated; station switching, live display, manual/automatic refresh, timestamp behavior, and failure recovery tested. Local automated empty-state checks passed; browser empty-state checks remain unverified. See shared setup for results and alerts 503 evidence. |
+| S6 | Configure Bus Time key and verify a real request. | Yuming | None | Complete: real request returned 6 visits, 4 with ETAs; credentials remain backend-only. |
+| S7 | Configure Render/Firebase deployment. | Yuming | None | Configured; local favorites and hosted account/favorites checks passed, confirmed by Yuming. Complete based on verified deployment, live data, CORS, Google sign-in, and favorites; see [deployment documentation](deployment.md). |
 
-**Parallel now:** S5, S6, S7, Firebase setup, and initial deployment.  
-**Agree before dependent feature work:** S3 and S4. Do not wait for every API to finish before developing frontend fixtures.
+**Setup progress:** S4 interface definitions and S7 initial deployment are complete.
+[API contracts](api-contract.md) and [usable examples](examples/README.md) are ready
+for implementation; source validation remains assigned to later tasks. See
+[deployment documentation](deployment.md) for S7 evidence.
+
+**S5 follow-up:** Browser verification of empty arrivals and alerts remains open.
+Local automated checks passed; see [S5 evidence](shared-setup.md#s5-verification).
+This follow-up does not block S4/S7 completion or contract-based development.
+
+**Next:** Establish the shared Git baseline, then create feature branches. All
+three share ongoing deployment responsibility.
 
 ### Existing interfaces to preserve
 
@@ -70,11 +79,11 @@ The reviewed app uses Flask and station-based APIs, not the old midpoint slide's
 - GET /api/alerts?route_id=...
 - GET/POST /api/favorites and DELETE /api/favorites/:station_id — existing station-only contract.
 
-The existing favorites contract needs an agreed extension/migration for multiple saved-item types. New status, bus, schedule, equipment, journey, subscription, and notification paths are **to be defined in S4**, not assumed to exist.
+The existing station favorites contract is preserved. Its parallel v2 extension and migration, plus new transit/status/schedule/equipment/journey/subscription/notification interfaces, are **defined in S4 and prepared for later implementation**, not registered endpoints.
 
 Keep [api-contract.md](api-contract.md) authoritative and update it with implementation changes. Existing arrival polling waits 30 seconds after a polling request completes; coordinate refresh changes and respect each source's usage constraints.
 
-## 5. Member 1 — Yuming: transit data, routing, integration
+## 5. Yuming: transit data, routing, integration
 
 ### A. Static-data foundation
 
@@ -85,7 +94,7 @@ Keep [api-contract.md](api-contract.md) authoritative and update it with impleme
 | Y3 | Retain/import route geometry and expose it in the agreed representation. | Y1, S4 | Geometry can be retrieved by route. |
 | Y4 | Import bus routes/stops, route-stop relationships, geometry, and agency references. | S3, S4 | Bus records have consistent identifiers and relationships. |
 | Y5 | Preserve schedule trips, ordered stops, calendars, exceptions, and transfer information needed by downstream features. | Y1, Y4 | Schedule and connection records remain linked. |
-| Y6 | Supply clearly labeled station, stop, route, geometry, arrival, schedule, and journey response fixtures early; refine as real adapters finish. | S4 | Zhaorui can develop without waiting for live endpoints. |
+| Y6 | Supply clearly labeled station, stop, route, geometry, arrival, schedule, and journey response fixtures early; refine as real adapters finish. | S4 | Complete: initial synthetic fixtures for discovery, details, geometry, arrivals/vehicles, schedules and journeys in docs/examples. Remaining: refine against real adapters and validate source mappings. |
 | Y7 | Document source, import date, validation, regeneration, and required deployment artifacts. | Y2, Y3, Y4, Y5 | Another teammate can reproduce the data build. |
 
 Y5 can start for subway data before Y4 finishes; complete both modes before closing the task.
@@ -95,11 +104,11 @@ Y5 can start for subway data before Y4 finishes; complete both modes before clos
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
 | Y8 | Reverify existing subway arrivals across representative feed groups and multi-group stations. | S1 | Correct station/line/direction/timestamp; failures remain explicit. |
-| Y9 | Verify normalized subway alerts and affected route/stop information; explain coverage limitations. | S1, S4 | Members 2 and 3 can consume alerts consistently. |
+| Y9 | Verify normalized subway alerts and affected route/stop information; explain coverage limitations. | S1, S4 | Zachary and Zhaorui can consume alerts consistently. |
 | Y10 | Integrate bus arrival predictions and supported vehicle positions. | S6, Y4, S4 | A real route/stop returns meaningful live results. |
 | Y11 | Integrate bus alerts and map affected route/stop references. | Y4, S6, S4 | Notices can be matched to imported entities. |
 | Y12 | Add/reuse timeout, freshness, validated caching, and explicit-error behavior for bus requests. | Y10, Y11 | No fictional fallback or failure-as-normal behavior. |
-| Y13 | Connect agreed search/detail/arrival/map-data endpoints to the service layer. | S4, Y2, Y3, Y4, Y8, Y10, Y12 | Frontend consumes normalized JSON without parsing source feeds. |
+| Y13 | Connect agreed search/detail/arrival/map-data endpoints to the service layer. | S4, Y2, Y3, Y4, Y8, Y10, Y12 | Complete: existing subway search/arrivals wiring. Remaining: prepared detail/map/bus endpoints; validate and integrate real normalized sources. |
 
 ### C. Schedules
 
@@ -119,7 +128,7 @@ Y5 can start for subway data before Y4 finishes; complete both modes before clos
 | Y20 | Add valid transfers, including supported cross-mode links; document walking assumptions. | Y19 | Transfers do not rely only on similar names or arbitrary proximity. |
 | Y21 | Implement origin/destination search and explicit no-path behavior. | Y20, S4 | Returned paths are valid for the declared graph. |
 | Y22 | Group paths into journey legs with boarding/alighting stops, routes, and transfers. | Y21 | Frontend receives understandable instructions. |
-| Y23 | Define optimization and timing basis; use schedules if making time-aware claims. | Y21; Y17 for schedule-based timing | Duration/arrival estimates are explainable; unsupported live rerouting is not claimed. |
+| Y23 | Define optimization and timing basis; use schedules if making time-aware claims. | Y21; Y17 for schedule-based timing | Complete: interface declares fewest-transfers optimization and schedule timing basis. Remaining: implement/validate that basis and document transfer/time assumptions; no unsupported live rerouting. |
 | Y24 | Test direction, transfers, same endpoints, disconnected paths, and each declared mode. | Y22, Y23 | Tests verify the supported routing scope. |
 | Y25 | Integrate and verify planner UI with Zhaorui. | Y22, Y23, C11 | A deployed user can request and inspect a real journey. |
 
@@ -133,16 +142,16 @@ Y5 can start for subway data before Y4 finishes; complete both modes before clos
 
 Main areas: backend/app/data/, backend/scripts/, static_gtfs.py, mta_client.py, transit_service.py, transit-related routes/tests, and API/architecture documentation. New modules should have clear ownership.
 
-## 6. Member 2 — accounts, personalized services, supporting APIs, deployment
+## 6. Zachary: accounts, personalized services, supporting APIs, deployment
 
 ### A. Firebase accounts
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| B1 | Configure Firebase project, Google Auth, and Firestore. | S7 | Required services are available. |
-| B2 | Configure local/deployed authorized domains. | B1, S7 | Both environments support sign-in. |
-| B3 | Configure frontend Firebase settings with Zhaorui and backend credentials securely. | B1 | Both tiers reach the correct project. |
-| B4 | Verify sign-in/out, reload/session restoration, canceled sign-in, and errors. | B2, B3, C12 | Deployed authentication works. |
+| B1 | Configure Firebase project, Google Auth, and Firestore. | S7 | Complete in S7: Firebase project, Google Auth and Firestore configured by Yuming. Reuse existing project. |
+| B2 | Configure local/deployed authorized domains. | B1, S7 | Complete in S7 for current localhost/deployed frontend domains. Remaining: configure/verify any future hostname changes. |
+| B3 | Configure frontend Firebase settings with Zhaorui and backend credentials securely. | B1 | Complete in S7 for current frontend settings/backend credentials. Remaining: new environment/feature configuration as needed; keep secrets backend-only. |
+| B4 | Verify sign-in/out, reload/session restoration, canceled sign-in, and errors. | B2, B3, C12 | Complete portion: existing Google sign-in and hosted account checks confirmed in S7; session listener/restoration code present. Remaining: explicitly record canceled/failed popup, sign-out and reload cases, and regressions across future screens; no separate case-by-case browser evidence claimed. |
 | B5 | Verify protected API token checks and user derivation. | B3 | Missing/invalid tokens cannot access private records. |
 | B6 | Deploy/verify intended Firestore rules and backend authorization. | B1, B5 | Direct client access and backend access match the design. |
 
@@ -150,18 +159,18 @@ Main areas: backend/app/data/, backend/scripts/, static_gtfs.py, mta_client.py, 
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| B7 | Define saved-item records for stations, bus stops, and routes; agree on existing-favorite migration. | S3, S4 | Type/mode/ID are unambiguous. |
-| B8 | Complete validated add/list/remove operations and duplicate prevention. | B5, B7 | All supported favorite types work. |
-| B9 | Verify persistence across reload/sign-in sessions. | B8 | Saved records remain available. |
+| B7 | Define saved-item records for stations, bus stops, and routes; agree on existing-favorite migration. | S3, S4 (complete) | Complete: typed station/stop/route identity, storage compatibility and legacy/v2 migration contract defined in API contract. Remaining migration implementation belongs to B8. |
+| B8 | Complete validated add/list/remove operations and duplicate prevention. | B5, B7 | Complete portion: existing station-only add/list/remove with document upsert. Remaining: implement v2 bus/route operations and compatibility projection, validate types, duplicate/concurrent behavior and retired-item removal. |
+| B9 | Verify persistence across reload/sign-in sessions. | B8 | Complete portion: existing station favorites checks confirmed locally/hosted in S7; remount persistence covered by simulated-store tests. Remaining: explicit cross-sign-in and all new saved-type persistence cases. |
 | B10 | Verify isolation using two accounts. | B8 | Users cannot read/change each other's records. |
-| B11 | Persist enable/disable notification subscription preferences. | B7, B8 | Preferences can be changed and restored. |
-| B12 | Define/store notification read state. | B5, S4 | Read/unread behavior has a persistent contract. |
+| B11 | Persist enable/disable notification subscription preferences. | B5, S4/B7 (definitions complete); independent of favorite saves | Preferences can be changed and restored. |
+| B12 | Define/store notification read state. | B5, S4 | Complete portion: read/unread fields, timestamps and API defined in S4. Remaining: persist read state/counts and verify concurrent/user-isolated updates. |
 
 ### C. Status and equipment services
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| B13 | Define status labels/precedence from actual normalized source fields, with Yuming. | Y9, Y11, S4 | Every label has an explainable basis. |
+| B13 | Define status labels/precedence from actual normalized source fields, with Yuming. | S4 examples (ready); Y9 for subway, Y11 for bus validation | Complete portion: status/impact enums and conservative precedence defined in S4. Remaining: verify actual source effects/authoritative status mapping; unknown stays explicit. |
 | B14 | Implement status responses with unknown/unavailable states and source timing information. | B13 | Retrieval failure never implies normal service. |
 | B15 | Retrieve equipment information and reported outages; map to stations using shared IDs. | S4, Y2 | Station associations and source timestamps are correct. |
 | B16 | Distinguish reported outage, known status, unknown, and unavailable where supported. | B15 | No-outage results do not falsely prove accessibility. |
@@ -172,48 +181,48 @@ B13–B14 can start with subway alerts before the bus adapter finishes.
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| B17 | Match normalized alerts to route/station/stop subscriptions using supported affected-entity data. | B11, Y9, Y11 | Matching is relevant and its limitations are documented. |
+| B17 | Match normalized alerts to route/station/stop subscriptions using supported affected-entity data. | S4 examples, B11; Y9 for subway, Y11 for bus live matching | Matching is relevant and its limitations are documented. |
 | B18 | Identify new/materially changed notices; deduplicate refreshes and concurrent evaluation. | B17 | Unchanged alerts do not repeatedly notify. |
-| B19 | Expose notification list/unread/mark-as-read operations; define refresh evaluation while app is open. | B12, B18, S4 | UI can complete the notification workflow. |
+| B19 | Expose notification list/unread/mark-as-read operations; define refresh evaluation while app is open. | B12, B18, S4 | Complete portion: list/unread/read and explicit refresh-evaluation interface defined in S4. Remaining: implement evaluator/API, transactional deduplication and verify UI workflow. |
 | B20 | Verify unsubscribe and cross-user behavior. | B19 | Disabled subscriptions stop new notifications; data stays private. |
 
 ### E. Backend deployment
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| B21 | Deploy the existing Flask foundation early using an appropriate production server. | S7, S1 | Hosted health endpoint is reachable. |
-| B22 | Configure environment values, credentials, origins/API routing, and required imported data artifacts. | B21; coordinate C20/Y7 | Hosted API supports frontend and external-data requests. |
+| B21 | Deploy the existing Flask foundation early using an appropriate production server. | S7, S1 | Complete in S7: existing Flask backend hosted with Gunicorn; health/connectivity checks recorded. Reuse service. |
+| B22 | Configure environment values, credentials, origins/API routing, and required imported data artifacts. | B21; coordinate C20/Y7 | Complete portion in S7: existing subway catalog, live mode, Firebase credentials and frontend/API origins work. Remaining: verify hosted bus-key access and configure new geometry/schedule artifacts as features arrive. |
 | B23 | Redeploy incremental features and verify accounts, persistence, transit APIs, and recovery online. | B22, relevant features | Feature owners can test the real hosted system. |
-| B24 | Document deployment, configuration, redeployment, and operational limitations. | B23 | Team can reproduce the deployment without secrets in docs. |
+| B24 | Document deployment, configuration, redeployment, and operational limitations. | B23 | Complete portion: initial configuration, redeploy instructions and limitations in deployment.md. Remaining: update for new artifacts/features and verify reproducibility. |
 
 Main areas: Firebase service/configuration, favorites and new personalized routes/services, status/equipment modules, firestore.rules, backend tests and deployment documentation. Coordinate transit_service.py changes with Yuming.
 
-## 7. Member 3 — Zhaorui: frontend and visualization
+## 7. Zhaorui: frontend and visualization
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| C1 | Verify/integrate existing frontend branch improvements. | S5 | Existing work is preserved and functioning. |
+| C1 | Verify/integrate existing frontend branch improvements. | S1 (integrated); S5 browser follow-up separate | Complete for existing frontend: branch improvements integrated; station/live/refresh/recovery evidence in S5. S5 browser empty-state follow-up remains separate. |
 | C2 | Build shared navigation and consistent page/panel structure. | S4 | Every feature is reachable. |
-| C3 | Add subway/bus route/station/stop search and selection. | Y6; Y13 for live integration | Selection opens the correct entity. |
-| C4 | Build map, route geometry, selectable stops/stations, and selection synchronization. | S4/Y6; Y3/Y4/Y13 for integration | Map and detail view agree. |
-| C5 | Add available live bus-position overlays with timestamps and unavailable states. | C4, Y10 | Positions are sourced and not fabricated. |
-| C6 | Complete arrival display, refresh states, and explicit stale-result handling. | Y6; Y8/Y10 for integration | Old trains do not misleadingly remain at zero minutes. |
-| C7 | Add date/direction schedule controls and clearly labeled departures. | Y6; Y17 for integration | Users distinguish schedules from predictions. |
-| C8 | Display relevant alerts for supported routes/stops; fix first-route-only/empty-state ambiguity. | S4, Y9, Y11 | UI describes actual alert coverage. |
-| C9 | Build service-status overview with notices and update/source information. | Fixtures first; B14 for integration | Unknown/unavailable states are visible. |
-| C10 | Build equipment panel with outage, unknown, and unavailable states. | Fixtures first; B15/B16 for integration | UI does not overclaim accessibility. |
-| C11 | Build origin/destination selection, journey legs, transfers, and no-path states. | Y6; Y22/Y23 for integration | Planner is understandable and honest about timing. |
-| C12 | Build/connect sign-in/out and account states. | B3; finish with B4 | Successful/canceled/failed sign-in is handled. |
-| C13 | Add save/remove actions and saved-items view for supported types. | B7; B8 for integration | Saved items reopen and can be removed. |
-| C14 | Add subscription controls, notification panel, unread indicator, and read actions. | Fixtures first; B11/B19 for integration | Personalized notification flow works. |
+| C3 | Add subway/bus route/station/stop search and selection. | S4 examples (ready); Y13 for live integration | Complete portion: subway station search/selection. Remaining: bus routes/stops, route details and navigation into new views. |
+| C4 | Build map, route geometry, selectable stops/stations, and selection synchronization. | S4 examples (ready); Y3/Y4/Y13 for live integration | Map and detail view agree. |
+| C5 | Add available live bus-position overlays with timestamps and unavailable states. | C4, S4 examples (ready); Y10 for live integration | Positions are sourced and not fabricated. |
+| C6 | Complete arrival display, refresh states, and explicit stale-result handling. | S4 examples (ready); Y8/Y10 for live integration | Old trains do not misleadingly remain at zero minutes. |
+| C7 | Add date/direction schedule controls and clearly labeled departures. | S4 examples (ready); Y17 for live integration | Users distinguish schedules from predictions. |
+| C8 | Display relevant alerts for supported routes/stops; fix first-route-only/empty-state ambiguity. | S4 examples (ready); Y9/Y11 for precise/live coverage | Complete portion: hook fetches all subway alerts and matches every station route (not only first), retaining unscoped notices; empty wording/local tests present. Remaining: S5 browser empty states, precise affected-entity coverage, bus alerts and new views; stop-only relevance remains limited. |
+| C9 | Build service-status overview with notices and update/source information. | S4 examples (ready); B14 for integration | Unknown/unavailable states are visible. |
+| C10 | Build equipment panel with outage, unknown, and unavailable states. | S4 examples (ready); B15/B16 for integration | UI does not overclaim accessibility. |
+| C11 | Build origin/destination selection, journey legs, transfers, and no-path states. | S4 examples (ready); Y22/Y23 for live integration | Planner is understandable and honest about timing. |
+| C12 | Build/connect sign-in/out and account states. | B3 (complete); B4 for remaining checks | Complete portion: Google sign-in/out controls, auth-state listener, signed-out/loading/error favorites states and hosted sign-in foundation. Remaining: canceled/failed sign-in and sign-out/reload verification with B4; account states across new screens. |
+| C13 | Add save/remove actions and saved-items view for supported types. | B7/S4 (complete); B8 for v2 integration | Complete portion: existing station save/remove/list/reopen UI and S7 favorites checks; local simulated-store tests cover recovery/remount. Remaining: typed bus-stop/route saved-items views and v2 integration. |
+| C14 | Add subscription controls, notification panel, unread indicator, and read actions. | S4 examples (ready); B11/B19 for integration | Personalized notification flow works. |
 | C15 | Extract UI text into English/Chinese dictionaries; add language selector. | C2; develop alongside other UI | Navigation, controls, statuses, and errors switch consistently. |
 | C16 | Remember language choice and define original-language MTA alert treatment. | C15 | Reload preserves the selection; untranslated text is clearly handled. |
-| C17 | Coordinate automatic/manual refresh, bounded waiting, request cleanup, and stale-response guards with Yuming. | C1, S4; relevant APIs for integration | No wrong-selection responses, duplicate timers, or indefinite busy state. |
+| C17 | Coordinate automatic/manual refresh, bounded waiting, request cleanup, and stale-response guards with Yuming. | C1, S4; relevant APIs for integration | Complete portion: existing subway hook has 30-second completion-based polling, manual refresh lock, 45-second timeout, cleanup/abort and stale-response guards. Remaining: reuse/test across bus and new screens; retain S5 browser empty-state follow-up. |
 | C18 | Verify loading/empty/error/recovery states on all feature screens. | Integrated screens | No blank/misleading failure experience. |
 | C19 | Verify responsive layout, keyboard access, focus visibility, and non-color-only information. | Integrated UI | Core workflows work on desktop/mobile-sized views and without a mouse. |
-| C20 | Deploy frontend early; connect hosted backend/Firebase; redeploy as features arrive. | S7, B21/B22 for integrated checks | Public HTTPS URL supports real workflows. |
+| C20 | Deploy frontend early; connect hosted backend/Firebase; redeploy as features arrive. | S7, B21/B22 for integrated checks | Complete portion in S7: frontend deployed and connected to hosted Flask/Firebase; live/account/favorites verified. Remaining: incremental feature redeploys and integrated checks. |
 
-Frontend fixtures must be clearly labeled. C12 and B4 are a shared iterative integration: build controls after B3, then verify account behavior together.
+Frontend fixtures must be clearly labeled. Existing B3 configuration and C12 controls are complete foundations; C12/B4 retain the additional account cases and verification across future screens. Contract-based UI development can start from S4 examples after the shared Git baseline is established.
 
 Main areas: frontend/src/pages/, components/, services/, hooks/, styles.css, language dictionaries, frontend tests and hosting configuration.
 
@@ -221,33 +230,58 @@ Main areas: frontend/src/pages/, components/, services/, hooks/, styles.css, lan
 
 ```mermaid
 flowchart TD
-    S["Shared IDs and API examples"]
-    S --> T["Yuming: imports and transit APIs"]
-    S --> A["Member 2: accounts and favorites"]
-    S --> U["Zhaorui: frontend with fixtures"]
-    T --> R["Yuming: schedules and routing"]
-    T --> N["Member 2: status and notification matching"]
-    A --> N
-    U --> I["Integrate real APIs and user features"]
+    subgraph Done["Completed foundations — reuse"]
+        S["Shared interfaces and fixtures: S3/S4, initial Y6"]
+        A["Existing Google sign-in and subway favorites"]
+        D["Initial Render/Firebase deployment: S7"]
+    end
+
+    S --> G["All three: establish shared Git baseline next"]
+    A --> G
+    D --> G
+    G --> T["Yuming: extend transit catalogs, geometry and live APIs"]
+    G --> X["Zachary: typed favorites, subscriptions and remaining account checks"]
+    G --> U["Zhaorui: new screens using prepared fixtures"]
+
+    T --> R["Yuming: schedules, transfers and routing"]
+    T -->|"Catalog IDs for saved items"| X
+    T -->|"Alerts and station mappings"| N["Zachary: status, equipment and notification services"]
+    X -->|"Subscriptions for notification matching"| N
+
+    T --> I["All three: integrate real APIs and frontend features"]
     R --> I
+    X --> I
     N --> I
-    D["Early frontend and backend deployment"] --> V["Verify integrated app online"]
-    I --> V
-    V --> F["Fix defects and freeze final build"]
-    F --> P["Record demo and rehearse"]
+    U --> I
+    I --> V["All three: incremental deployment and full workflow verification"]
+    D --> V
+    E["Zhaorui with Yuming: S5 browser empty-state follow-up"] --> V
+    V --> F["All three: fix defects and freeze final build"]
+    F --> P["All three: record demo and rehearse"]
+
+    classDef complete fill:#e8f6ee,stroke:#28734a,color:#163b28
+    class S,A,D complete
 ```
+
+Completed foundations cover the existing scope; account edge-case checks and
+bus-stop/route favorites remain in X. S5's browser empty-state follow-up remains
+separate from completed S7. After the shared Git baseline, Zhaorui can build from
+fixtures while backend work proceeds. Catalog and alert edges apply to the
+corresponding extensions: status/equipment need not wait for notifications, and
+subway work need not wait for bus source validation. Real feature integration
+requires the relevant APIs; final verification covers all supported workflows.
 
 ### What can proceed in parallel
 
 | Work | Parallel work / prerequisite |
 | --- | --- |
-| Bus-key request | Everything except real keyed bus requests can proceed. |
-| Static imports | Firebase configuration, initial deployment, and frontend fixtures. |
-| Map/planner UI | Backend adapters/routing, after contract and fixture agreement. |
+| Bus access | S6 key/access check complete; detailed adapter field checks and hosted configuration remain. |
+| Static imports | Reuse completed Firebase/deployment foundation; frontend can use S4 examples. |
+| Map/planner UI | Backend adapters/routing, using completed S4 contracts and fixtures. |
 | Favorites | Transit feeds, schedules, maps, and routing, after shared IDs. |
 | Languages | Ongoing frontend development using one dictionary structure. |
-| Deployment | Feature development; do not postpone deployment until the end. |
-| Notification panel | Matching backend after agreeing response/read-state contracts. |
+| Deployment | Initial setup complete in S7; incremental deployment follows feature work after shared Git baseline. |
+| Notification panel | Matching backend using completed S4 response/read-state contracts. |
 | Real notification matching | Requires subscriptions and normalized affected-entity data. |
 | Routing | Requires valid static connectivity/transfers; schedule-based claims additionally need schedule handling. |
 
@@ -255,10 +289,10 @@ flowchart TD
 
 These are ambitious targets for three people. Do not mark a target as achieved without evidence. If a deadline slips, identify the blocker and affected dependent features that day; explicitly agree on any scope adjustment rather than hiding unfinished work.
 
-| Date | Yuming | Member 2 | Zhaorui | Shared gate |
+| Date | Yuming | Zachary | Zhaorui | Shared gate |
 | --- | --- | --- | --- | --- |
-| Nov 24 | Audit current data, establish contracts, request/configure bus key | Start Firebase and backend deployment | Verify frontend branch, plan screens, deploy frontend foundation | Current status, owners, response examples, blockers recorded |
-| Nov 25 | Core imports/live responses, schedule/routing foundations | Deployed authentication/favorites; start supporting APIs | Connect core map/transit/account views; develop remaining fixtures | Public foundation supports real transit and account workflows |
+| Nov 24 | Complete: S1–S4 definitions, S6 access, S7 setup by Yuming; prepared examples and reconciled handoff | Reuse completed Firebase/backend setup and station favorites; take remaining B work after baseline | Reuse integrated frontend/deployment/account/station-favorites foundations; build new screens from S4 examples after baseline | S4/S6/S7 complete; S5 browser empty-state follow-up open; shared Git baseline next, before implementation branches |
+| Nov 25 | Extend imports/live responses and schedule/routing foundations | Extend typed favorites/supporting APIs; remaining account checks | Build/connect map and new transit views using prepared examples | Reuse verified public foundation; integrate new features after baseline |
 | Nov 26 | Complete supported schedules/routing and remaining transit integration | Complete subscriptions, notifications, status/equipment APIs | Connect planner, notifications, equipment, language switching | Every targeted feature has an integrated implementation, or an explicit unresolved blocker |
 | Nov 27 | Verify data/schedules/routing; fix defects | Verify accounts/isolation/notifications/deployment; fix defects | Verify mobile/languages/refresh/error states; fix defects | Full deployed user-flow checks completed |
 | Nov 28 | Fix defects and prepare technical evidence | Fix defects and document backend/deployment | Fix defects, final UI checks and demo captures | Feature freeze; slides and backup recording ready |

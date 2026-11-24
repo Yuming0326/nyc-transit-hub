@@ -1,0 +1,11 @@
+{
+  "mode": "bus",
+  "source": "demo",
+  "routes": [
+    {
+      "id": "MTA NYCT_B63",
+      "name": "Illustrative B63 route",
+      "short_name": "B63"
+    }
+  ]
+}

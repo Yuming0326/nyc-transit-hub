@@ -112,13 +112,15 @@ def test_expired_cache_refetches(live, monkeypatch):
     assert fetch.call_count == 2
 
 
-def test_cached_feed_is_rechecked_for_freshness(live, monkeypatch):
+@pytest.mark.parametrize('path,age', [('/api/stations/R20/arrivals', 125),
+                                     ('/api/alerts?route_id=R', 605)])
+def test_cached_feed_is_rechecked_for_freshness(live, monkeypatch, path, age):
     _, client, fetch = live
     from app.services import mta_client
     now = time.time()
-    assert client.get('/api/stations/R20/arrivals').status_code == 200
-    monkeypatch.setattr(mta_client.time, 'time', lambda: now + 125)
-    assert client.get('/api/stations/R20/arrivals').status_code == 503
+    assert client.get(path).status_code == 200
+    monkeypatch.setattr(mta_client.time, 'time', lambda: now + age)
+    assert client.get(path).status_code == 503
     assert fetch.call_count == 1
 
 

@@ -1,0 +1,431 @@
+{
+  "synthetic": true,
+  "description": "Documentation fixtures only; not live data or registered new routes. Error cases describe controlled conditions, not failures implied by the valid request alone.",
+  "operations": [
+    {
+      "operation": "health",
+      "implementation": "implemented",
+      "empty_semantics": "No empty success body; unknown station references are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/health"
+          },
+          "status": 200,
+          "response": {
+            "status": "ok",
+            "transit_mode": "demo"
+          }
+        }
+      ]
+    },
+    {
+      "operation": "station-search",
+      "implementation": "implemented",
+      "empty_semantics": "See empty/no_change case; unknown station references are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations?search=illustrative"
+          },
+          "status": 200,
+          "response": {
+            "stations": [
+              {
+                "id": "R20",
+                "name": "Illustrative station",
+                "routes": [
+                  "R"
+                ],
+                "latitude": 40.735,
+                "longitude": -73.99
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations?search=illustrative"
+          },
+          "status": 200,
+          "response": {
+            "stations": []
+          }
+        }
+      ]
+    },
+    {
+      "operation": "subway-arrivals",
+      "implementation": "implemented",
+      "empty_semantics": "See empty/no_change case; unknown station references are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/arrivals"
+          },
+          "status": 200,
+          "response": {
+            "station_id": "R20",
+            "source": "demo",
+            "updated_at": "2026-10-24T16:00:00+00:00",
+            "arrivals": [
+              {
+                "id": "sample-R20N-1",
+                "route_id": "N",
+                "destination": "Astoria–Ditmars Blvd (sample)",
+                "direction": "Northbound",
+                "arrival_time": "2026-10-24T16:03:00+00:00"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/arrivals"
+          },
+          "status": 200,
+          "response": {
+            "station_id": "R20",
+            "source": "demo",
+            "updated_at": "2026-10-24T16:00:00+00:00",
+            "arrivals": []
+          }
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/arrivals"
+          },
+          "status": 404,
+          "response": {
+            "error": "Station not found"
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/stations/R20/arrivals"
+          },
+          "status": 503,
+          "response": {
+            "error": "Live MTA data is temporarily unavailable. Please retry."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "subway-alerts",
+      "implementation": "implemented",
+      "empty_semantics": "See empty/no_change case; unknown station references are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/alerts?route_id=R"
+          },
+          "status": 200,
+          "response": {
+            "source": "demo",
+            "alerts": [
+              {
+                "id": "demo-alert",
+                "header": "Illustrative disruption",
+                "description": "Synthetic notice",
+                "route_ids": [
+                  "R"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/alerts?route_id=R"
+          },
+          "status": 200,
+          "response": {
+            "source": "demo",
+            "alerts": []
+          }
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "GET",
+            "path": "/api/alerts?route_id=invalid"
+          },
+          "status": 400,
+          "response": {
+            "error": "Unknown or empty route_id"
+          },
+          "condition": "Unsupported subway route filter."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/alerts?route_id=R"
+          },
+          "status": 503,
+          "response": {
+            "error": "Live MTA data is temporarily unavailable. Please retry."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "favorites-list",
+      "implementation": "implemented",
+      "empty_semantics": "See empty/no_change case; unknown station references are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "GET",
+            "path": "/api/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": [
+              {
+                "station_id": "R20"
+              }
+            ]
+          }
+        },
+        {
+          "name": "empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "favorites": []
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "GET",
+            "path": "/api/favorites"
+          },
+          "status": 401,
+          "response": {
+            "error": "Sign in to access favorites."
+          },
+          "condition": "Omit the Authorization header."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "GET",
+            "path": "/api/favorites",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Firebase is not configured on the backend."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "favorites-add",
+      "implementation": "implemented",
+      "empty_semantics": "No empty success body; unknown station references are 404 and mutations return their result.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "POST",
+            "path": "/api/favorites",
+            "body": {
+              "station_id": "R20"
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 201,
+          "response": {
+            "station_id": "R20"
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "POST",
+            "path": "/api/favorites",
+            "body": {
+              "station_id": "R20"
+            }
+          },
+          "status": 401,
+          "response": {
+            "error": "Sign in to access favorites."
+          },
+          "condition": "Omit the Authorization header."
+        },
+        {
+          "name": "error_400",
+          "request": {
+            "method": "POST",
+            "path": "/api/favorites",
+            "body": {
+              "station_id": 42
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 400,
+          "response": {
+            "error": "station_id must be a string."
+          },
+          "condition": "station_id is not a string."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "POST",
+            "path": "/api/favorites",
+            "body": {
+              "station_id": "R20"
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Station not found"
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "POST",
+            "path": "/api/favorites",
+            "body": {
+              "station_id": "R20"
+            },
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Firebase is not configured on the backend."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    },
+    {
+      "operation": "favorites-delete",
+      "implementation": "implemented",
+      "empty_semantics": "See empty/no_change case; unknown station references are 404.",
+      "cases": [
+        {
+          "name": "success",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/favorites/R20",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          }
+        },
+        {
+          "name": "no_change",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/favorites/R20",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 200,
+          "response": {
+            "deleted": true
+          }
+        },
+        {
+          "name": "error_401",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/favorites/R20"
+          },
+          "status": 401,
+          "response": {
+            "error": "Sign in to access favorites."
+          },
+          "condition": "Omit the Authorization header."
+        },
+        {
+          "name": "error_404",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/favorites/R20",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 404,
+          "response": {
+            "error": "Station not found"
+          },
+          "condition": "Use a well-formed unknown entity ID (private IDs are scoped to caller)."
+        },
+        {
+          "name": "error_503",
+          "request": {
+            "method": "DELETE",
+            "path": "/api/favorites/R20",
+            "headers": {
+              "Authorization": "Bearer <Firebase-ID-token>"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Firebase is not configured on the backend."
+          },
+          "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        }
+      ]
+    }
+  ]
+}
