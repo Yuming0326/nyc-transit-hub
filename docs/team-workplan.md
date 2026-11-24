@@ -57,33 +57,17 @@ Each task below is a checklist item. The setup record captures the reviewed stat
 | S6 | Configure Bus Time key and verify a real request. | Yuming | None | Complete: real request returned 6 visits, 4 with ETAs; credentials remain backend-only. |
 | S7 | Configure Render/Firebase deployment. | Yuming | None | Configured; local favorites and hosted account/favorites checks passed, confirmed by Yuming. Complete based on verified deployment, live data, CORS, Google sign-in, and favorites; see [deployment documentation](deployment.md). |
 
-**S5 browser empty-state checks remain unverified:** station switching, live display,
-manual/automatic refresh, timestamp behavior, and failure recovery were tested.
-Controlled HTTP 200 empty-arrivals and empty-alerts checks now pass: each displays
-its empty message without an error, clears previous results, and recovers after a
-controlled failure. These are local automated hook/component checks, not hosted
-browser checks. Verify the empty-arrivals and empty-alerts messages in the browser
-separately before closing that remaining S5 item. The restricted-run 503 was traced to DNS failure; network-enabled
-live checks passed twice after diagnostic improvements. The earlier intermittent
-alerts-only cause remains unconfirmed. See [S5 evidence](shared-setup.md#s5-verification).
+**Setup progress:** S4 interface definitions and S7 initial deployment are complete.
+[API contracts](api-contract.md) and [usable examples](examples/README.md) are ready
+for implementation; source validation remains assigned to later tasks. See
+[deployment documentation](deployment.md) for S7 evidence.
 
-**S7 complete — November 24, 2026:** Yuming confirmed deployment, live data,
-CORS, Google sign-in, and favorites checks. Initial Render/Firebase setup was
-completed by Yuming; all three share ongoing deployment responsibility. Earlier
-hosted connectivity evidence is preserved in [deployment.md](deployment.md).
-Commit/runtime recording, cold-start testing, and exact rules-file matching are
-not S7 completion requirements and are not marked passed. Keep restrictive
-Firestore rules. S5's unverified browser empty-state checks remain separate.
+**S5 follow-up:** Browser verification of empty arrivals and alerts remains open.
+Local automated checks passed; see [S5 evidence](shared-setup.md#s5-verification).
+This follow-up does not block S4/S7 completion or contract-based development.
 
-**S4 complete — interface definition:** [API contracts](api-contract.md) and
-[usable examples](examples/README.md) cover discovery/details, arrivals/vehicles,
-map, schedules/journeys, typed favorites/migration, subscriptions/notifications,
-status/equipment. Source checks remain assigned to later tasks, not blockers to
-contract-based development. Teammate acknowledgment is not claimed.
-
-**Handoff gate:** prepare the shared Git baseline next with the team. No commit,
-push, merge, deployment, or implementation branch is part of this setup update.
-S5's browser empty-state check remains a follow-up, not an S4/S7 blocker.
+**Next:** Establish the shared Git baseline, then create feature branches. All
+three share ongoing deployment responsibility.
 
 ### Existing interfaces to preserve
 
