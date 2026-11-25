@@ -21,9 +21,10 @@ function mount(store, options = {}) {
     if (request.method === 'DELETE') { store.delete(decodeURIComponent(path.split('/').at(-1))); return {}; }
     return { favorites: [...store].map(station_id => ({ station_id })) };
   };
-  const context = vm.createContext({ React, api, AbortController, AbortSignal,
+  const context = vm.createContext({ React, api, AbortController, AbortSignal, setTimeout, clearTimeout,
     auth: { currentUser: user }, logIn() {}, logOut() {},
-    StationSearch: 'StationSearch', StationPage: 'StationPage',
+    StationSearch: 'StationSearch', StationPage: 'StationPage', ExplorePage: 'ExplorePage', PlannerPage: 'PlannerPage', ServicesPage: 'ServicesPage', NotificationsPage: 'NotificationsPage',
+    useI18n: () => ({ language: 'en', setLanguage() {}, t: key => ({ appName: 'NYC Transit Hub', tagline: 'Plan with live and scheduled transit information.', language: 'Language', english: 'English', chinese: '简体中文', dashboard: 'Dashboard', explore: 'Explore & map', planner: 'Journey planner', services: 'Service info', notifications: 'Notifications', liveMode: 'Live mode', demoMode: 'Demo mode', modeUnavailable: 'Backend mode unavailable', checkingBackend: 'Checking backend…', loading: 'Loading…', retry: 'Retry', signOut: 'Sign out', signIn: 'Sign in with Google', originalMta: 'Original MTA text' })[key] || key }),
     onAuthStateChanged: (_auth, callback) => { authChanged = callback; callback(user); return () => {}; },
     useState(initial) { const i = cursor++; if (!(i in state)) state[i] = initial; return [state[i], value => { state[i] = typeof value === 'function' ? value(state[i]) : value; }]; },
     useEffect(fn, next) { const i = cursor++; if (!deps[i] || next.some((value, index) => value !== deps[i][index])) { deps[i] = next; effects.push(() => { cleanup[i]?.(); cleanup[i] = fn(); }); } },

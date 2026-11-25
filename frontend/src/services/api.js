@@ -6,7 +6,9 @@ export async function api(path, options = {}) {
     ...options,
     headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}), ...options.headers },
   });
-  const body = await response.json();
+  let body;
+  try { body = await response.json(); }
+  catch { body = {}; }
   if (!response.ok) throw new Error(body.error || 'Request failed');
   return body;
 }
