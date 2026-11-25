@@ -115,7 +115,8 @@ From `backend/`:
 ```
 
 See [Y5 schema, coverage limits and refresh instructions](docs/mta-data.md#y5-schedule-retention--november-24-2026).
-Schedule/journey APIs are still later tasks; importing records does not enable them.
+`GET /api/schedules` (Y15–Y17) and `POST /api/journeys` (Y19–Y24) read these files.
+Until they are generated, both endpoints return 503; everything else works without them.
 
 ## Data build handoff
 

@@ -21,7 +21,7 @@ commands, field mappings, refresh policy, and limitations.
 `generated/bus/catalog.json` and `generated/bus/geometry.json` are the separate,
 matching official Bus Time discovery snapshot imported in Y4. They preserve bus
 route/stop/agency references, ordered source groups and GeoJSON; public bus APIs
-are not wired yet (Y13). Bus schedules and realtime data are separate tasks.
+are served by the Y13 bus endpoints. Bus schedules and realtime data are separate tasks.
 Refresh with `backend/scripts/import_bus_catalog.py`; see the MTA data reference
 for backend-only credentials, source validation and offline replay instructions.
 
@@ -30,7 +30,8 @@ indexed SQLite/gzip artifacts. Large databases are generated locally and ignored
 by generated/schedules/.gitignore; teammates/builds must regenerate them with
 `scripts/import_schedules.py --from-manifest ... --download-dir ...` from backend/.
 The manifest records feed-qualified identity scope, row counts, source versions,
-checksums and discovery mapping gaps. Schedule and journey APIs remain unimplemented.
+checksums and discovery mapping gaps. `/api/schedules` and `/api/journeys` read these
+databases and return 503 until they are generated.
 See the Y5 section in the MTA data reference before consuming these files.
 
 Y7's [data-build runbook](../../../docs/data-build.md) provides the complete

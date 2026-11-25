@@ -138,8 +138,8 @@ Paths below are relative to backend/app/data/.
 | Demo | stations.json | Existing demo subset |
 | Live subway | generated/catalog.json | Loaded once on app startup |
 | Subway map | catalog.json + stations.json + geometry.json under generated/; matching metadata | Implemented locally; geometry loads lazily against startup catalog |
-| Bus static APIs/map | generated/bus/catalog.json + geometry.json | Imported; API integration remains Y13 |
-| Schedules/planner data | generated/schedules/manifest.json and all seven referenced databases | `/api/schedules` (Y15–Y17) reads them lazily; planner remains Y19–Y24 |
+| Bus static APIs/map | generated/bus/catalog.json + geometry.json | Served by the Y13 bus endpoints |
+| Schedules/planner data | generated/schedules/manifest.json and all seven referenced databases | `/api/schedules` (Y15–Y17) and `/api/journeys` (Y19–Y24) read them lazily; both return 503 until generated |
 | Build verification | generated/data-manifest.json | Tracks JSON/manifest checksums and source pins |
 
 The schedule databases total 224,783,110 bytes compressed and 1,159,970,816 bytes
