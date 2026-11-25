@@ -179,7 +179,7 @@ unchanged. The new envelope supplies affected entities for notifications/status.
 
 | Method/path | Query/body | 200 response |
 | --- | --- | --- |
-| GET `/api/schedules` | required `mode`, `date`, and exactly one `station_id` (subway) or `stop_id` (bus); `route_id?`, `direction_id?` | `{mode,source,updated_at,service_date,timezone:"America/New_York",departures:[Departure]}` |
+| GET `/api/schedules` | required `mode`, `date` (YYYY-MM-DD service date), and exactly one `station_id` (subway) or `stop_id` (bus); `route_id?`, `direction_id?` (`0`/`1`) | `{mode,source:"mta",updated_at,service_date,timezone:"America/New_York",timing_basis:"schedule",departures:[Departure]}` |
 | POST `/api/journeys` | `{origin:Target,destination:Target,departure_time:UTC timestamp,modes:["subway"\|"bus"],optimization:"fewest_transfers"}` | `{source,updated_at,timing_basis:"schedule",optimization:"fewest_transfers",journeys:[Journey],no_path_reason:string\|null}` |
 
 `Departure` is `{id,trip_id,route_id,direction_id:string|null,destination:string|null,
@@ -189,6 +189,15 @@ service day. Apply calendar exceptions and New York DST rules before producing
 UTC timestamps. Return all matching departures for that service date, sorted by
 departure_time then id. No active service is a valid 200 with departures [].
 Missing calendar/timezone support is 503, not a fabricated schedule.
+
+**`/api/schedules` is implemented (Y15–Y17).** `updated_at` is the schedule import
+time and `timing_basis:"schedule"` marks these as timetable times, never realtime
+predictions; the endpoint does not call realtime feeds. A trip's last stop and
+no-pickup stops are not departures. `id` is `feed:YYYYMMDD:trip_id:stop_sequence`.
+Unknown station/stop/route is 404. A known stop/route without scheduled trips in
+the retained feeds, a date outside a feed's published period, or missing schedule
+artifacts is 503. Malformed or impossible dates, both or neither target IDs, and
+other invalid filters are 400. See [Y15–Y18](mta-data.md#y15y18-scheduled-departures--november-25-2026).
 
 Journeys accept only station/stop Targets as endpoints (routes are invalid),
 nonempty distinct mode values, and a parseable departure timestamp. Search over
@@ -340,9 +349,8 @@ records into those shapes. See [Y4 validation](mta-data.md#y4-bus-discovery-impo
 ## Schedule data foundation (Y5; endpoints still prepared)
 
 Subway plus six bus GTFS feeds are retained as indexed local SQLite/gzip artifacts
-with a tracked manifest. This does not implement `/api/schedules` or
-`/api/journeys`. Y14–Y18 must evaluate calendars/exceptions and service-day/DST
-conversion before responses use the prepared timing basis. Y19–Y24 implement
+with a tracked manifest. Y14–Y18 evaluate calendars/exceptions and service-day/DST
+conversion and serve `/api/schedules`; `/api/journeys` remains prepared. Y19–Y24 implement
 routing. Respect feed-qualified source IDs, pickup/drop-off and forbidden transfer
 records. There are 109 used source-only bus stop IDs and 47 discovery routes with
 no scheduled trips in these archives; missing coverage is unavailable, not proof

@@ -114,11 +114,11 @@ Y5 source retention is complete for both modes. Y14–Y18 can use the retained f
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| Y14 | Resolve active services for a selected date, including calendar exceptions. | Y5 | Results match the applicable service day. |
-| Y15 | Return departures by stop, route, direction, and date. | Y14, S4 | Stop sequences and times are ordered correctly. |
-| Y16 | Handle trips past midnight and New York timezone/daylight-saving behavior. | Y15 | Overnight departures belong to the correct service day. |
-| Y17 | Expose scheduled departures separately from realtime predictions. | Y15, Y16, S4 | Source and timing basis are clear. |
-| Y18 | Test weekday/weekend, exception-date, empty, overnight, and relevant timezone cases. | Y17 | Reproducible tests establish schedule behavior. |
+| Y14 | Resolve active services for a selected date, including calendar exceptions. | Y5 | Complete: `service_calendar.active_services` resolves calendar weekdays/ranges plus added/removed exceptions per feed; dates outside the published feed period are refused, not shown as empty. Subway Thanksgiving/Christmas resolve to Sunday service; see [Y14 notes](mta-data.md#y14-active-services-by-service-date--november-25-2026). Clock-time/overnight mapping remains Y16. |
+| Y15 | Return departures by stop, route, direction, and date. | Y14, S4 | Complete locally: `scheduled_departures` serves subway stations and bus stops across feeds with route/direction filters, skips arrival-only stops and sorts by real time; schedule store verifies and opens the retained feeds read-only. See [Y15–Y18](mta-data.md#y15y18-scheduled-departures--november-25-2026). |
+| Y16 | Handle trips past midnight and New York timezone/daylight-saving behavior. | Y15 | Complete: GTFS noon-minus-12h origin converted in UTC; 24:00+ trips keep their service date, cross-midnight windows include earlier service days, both DST changes tested. |
+| Y17 | Expose scheduled departures separately from realtime predictions. | Y15, Y16, S4 | Complete locally: `GET /api/schedules` returns `timing_basis:"schedule"` with the schedule import time, never calls realtime feeds; 404 unknown IDs, 503 coverage gaps/out-of-period dates, 200 [] for empty service days. Deployment packaging remains B22. |
+| Y18 | Test weekday/weekend, exception-date, empty, overnight, and relevant timezone cases. | Y17 | Complete: synthetic feeds through the real importer plus real-data checks (R20, B63) cover all listed cases; 264 backend tests passed. |
 
 ### D. Routing backend
 
