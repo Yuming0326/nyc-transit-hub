@@ -1,6 +1,7 @@
 import React from 'react';
 import ArrivalBoard from '../components/ArrivalBoard';
 import ServiceAlerts from '../components/ServiceAlerts';
+import SchedulePanel from '../components/SchedulePanel';
 import { useStationData } from '../hooks/useStationData';
 
 export default function StationPage({ station }) {
@@ -10,5 +11,6 @@ export default function StationPage({ station }) {
     <h2 className="station-title">{station.name}</h2>
     <ArrivalBoard {...arrivals} lastRefreshed={lastRefreshed} refreshing={alerts.loading} refresh={refresh} />
     <ServiceAlerts {...alerts} />
+    <SchedulePanel station={station} />
   </div>;
 }
