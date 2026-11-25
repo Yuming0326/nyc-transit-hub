@@ -11,8 +11,8 @@ export default function ServiceAlerts({ data, error, loading }) {
     {sourceLabel && <p className={`muted source-label ${sourceClass}`}><span className="status-dot" aria-hidden="true" />{sourceLabel}</p>}
     {alerts.map((alert, index) => {
       const routeIds = Array.isArray(alert?.route_ids) ? alert.route_ids : [];
-      return <article className="alert" key={alert?.id || `${alert?.header || 'alert'}-${index}`}><strong>{alert?.header || 'Service alert'}</strong><p>{alert?.description || 'No description available.'}</p><small>Routes: {routeIds.length ? routeIds.join(', ') : 'System-wide'}</small></article>;
+      return <article className="alert" key={alert?.id || `${alert?.header || 'alert'}-${index}`}><strong>{alert?.header || 'Service alert'}</strong><p>{alert?.description || 'No description available.'}</p><small>Routes: {routeIds.length ? routeIds.join(', ') : 'No route specified'}</small></article>;
     })}
-    {data && !alerts.length && <p>No active service alerts for this station.</p>}
+    {data && !alerts.length && <p>{error ? 'No alerts in the last successful response.' : 'No active service alerts for these routes.'}</p>}
   </section>;
 }

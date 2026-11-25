@@ -1,0 +1,13 @@
+{
+  "mode": "bus",
+  "source": "demo",
+  "route_id": "MTA NYCT_B63",
+  "stops": [
+    {
+      "id": "MTA_308214",
+      "name": "Illustrative B63 stop",
+      "latitude": 40.675,
+      "longitude": -73.983
+    }
+  ]
+}

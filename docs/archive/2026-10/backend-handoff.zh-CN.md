@@ -1,3 +1,5 @@
+> Historical implementation handoff, archived November 24, 2026. Local paths, team roles, test counts, and pending tasks below describe the earlier delivery. See [current setup](../../../README.md) and [deployment](../../deployment.md).
+
 # 第 2 项：后端交付说明
 
 ## 已完成

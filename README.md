@@ -1,11 +1,11 @@
 # NYC Transit Hub
 
 React + Vite frontend, Python Flask API, Firebase Authentication and Cloud Firestore.
-The application runs without Firebase credentials. Demo mode remains the default. Role 2 has connected the MTA adapter to the existing Flask endpoints; set `TRANSIT_MODE=live` to use the imported station catalog and official realtime arrivals/alerts. Live failures return explicit errors, never fictional fallback data. Frontend demo labels still need to be made conditional before a live webpage presentation.
+The application runs without Firebase credentials. Demo mode remains the default. The backend connects the MTA adapter to the existing Flask endpoints; set `TRANSIT_MODE=live` to use the imported station catalog and official realtime arrivals/alerts. Live failures return explicit errors, never fictional fallback data. The frontend displays live/demo labels using the configured mode and response source.
 
-## Backend handoff (role 2)
+## Start the backend on Windows
 
-See [Windows startup and team delivery instructions](docs/backend-handoff.zh-CN.md). Backend offline checks: 35 tests passed. The opt-in online check is `python scripts/check_live_api.py` from `backend/`; the saved [verification report](docs/backend-live-verification.json) records one successful check, not a continuing availability guarantee.
+Current integration evidence and remaining checks are recorded in [shared setup](docs/shared-setup.md) and [deployment](docs/deployment.md). The opt-in online check is `python scripts/check_live_api.py` from `backend/`. Earlier handoffs and smoke-test evidence are preserved in the [documentation archive](docs/archive/2026-10/README.md).
 
 On Windows PowerShell, from `backend/`:
 
@@ -17,7 +17,7 @@ Copy-Item .env.example .env
 .\.venv\Scripts\python.exe run.py
 ```
 
-If `.env` already exists, edit it instead of copying over it. Restart after changing configuration. No MTA API key or Firebase setup is required for these subway endpoints. Before presenting the webpage in live mode, coordinate with frontend owners to replace the hardcoded demo labels in HomePage, ArrivalBoard, ServiceAlerts, and the footer using actual response source/mode.
+If `.env` already exists, edit it instead of copying over it. Restart after changing configuration. No MTA API key or Firebase setup is required for these subway endpoints.
 
 ## Prerequisites
 Node.js 22+, Python 3.10+, npm. Run commands from the project root unless indicated.
@@ -64,7 +64,7 @@ Frontend Firebase config is public app identification. Admin credentials are sec
 
 ## Refresh the static MTA catalog
 
-**Owner: MTA data owner (role 1). Check weekly and before every demo or deployment.**
+**Owner: Yuming (transit data owner). Check weekly and before every demo or deployment.**
 This is a manual checklist; no scheduled refresh is configured.
 
 1. Create a branch for the update, such as `data/refresh-mta-catalog-YYYY-MM-DD`.
@@ -79,9 +79,9 @@ This is a manual checklist; no scheduled refresh is configured.
 
 3. Review both generated files under `backend/app/data/generated/`. Check station IDs, route membership, coordinates, and catalog metadata. Keep the station array and platform mappings from the same import together. If import or validation fails, keep the previous valid snapshot and investigate before committing.
 4. Commit the reviewed changes on the branch and open a pull request into `main`.
-5. After merge, the backend owner restarts/redeploys the service to load the new catalog once live integration uses it. Refreshing these files alone does not enable live Flask endpoints.
+5. After merge, the backend owner restarts/redeploys the service to load the new catalog. Live endpoints require `TRANSIT_MODE=live`.
 
-Only derived mappings are stored; the original ZIP and complete schedules are not retained. Arrivals and alerts use separate realtime feeds. See the [MTA data handoff](docs/mta-data-handoff.md) for sources, field mappings, update policy, and backend integration instructions.
+Only derived mappings are stored; the original ZIP and complete schedules are not retained. Arrivals and alerts use separate realtime feeds. See the [MTA data reference](docs/mta-data.md) for sources, field mappings, update policy, and runtime integration details.
 
 ## Next steps
-See [architecture](docs/architecture.md), [API contract](docs/api-contract.md), and [team workplan](docs/team-workplan.md). Integrate official static GTFS and realtime protobuf feeds before enabling live mode. There is no production deployment or external Firebase project created by this starter.
+See [architecture](docs/architecture.md), [API contract](docs/api-contract.md), and [team workplan](docs/team-workplan.md). Subway static GTFS and realtime feeds are integrated. See [deployment](docs/deployment.md) for the hosted application and Firebase setup; the team workplan tracks remaining features.

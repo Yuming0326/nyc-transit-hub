@@ -1,0 +1,19 @@
+{
+  "mode": "bus",
+  "source": "demo",
+  "stop_id": "MTA_308214",
+  "updated_at": "2026-11-24T15:00:00Z",
+  "arrivals": [
+    {
+      "id": "demo-bus-visit-1",
+      "route_id": "MTA NYCT_B63",
+      "route_name": "B63",
+      "direction_id": "1",
+      "destination": "Illustrative destination",
+      "arrival_time": "2026-11-24T15:05:00Z",
+      "vehicle_id": "demo-vehicle-1",
+      "recorded_at": "2026-11-24T14:59:55Z",
+      "distance_text": "5 stops away"
+    }
+  ]
+}
