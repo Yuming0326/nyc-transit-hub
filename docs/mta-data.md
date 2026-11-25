@@ -672,3 +672,73 @@ Checked on the retained data: R20 has 1,048 weekday departures on 2026-11-25 and
 has 89 weekday and 78 Thanksgiving departures. From 00:00 to 01:00 EST on
 Thanksgiving, R20 returns 15 departures, including 24:xx trips from the
 2026-11-25 service day.
+
+## Y19–Y24 journey planning — November 25, 2026
+
+**Complete locally; not deployed.** `POST /api/journeys` plans schedule-based
+journeys (`backend/app/services/journey_planner.py`, contract in
+[api-contract.md](api-contract.md#prepared-schedules-and-journeys)).
+
+- **Y19 directed connections.** Every connection comes from a retained GTFS trip
+  active on its service day (Y14) and keeps that trip's stop order, so a trip can
+  never be ridden backwards. Trips with the same public route, ordered stops and
+  pickup/drop-off rules form a pattern; patterns are split where a trip would
+  overtake another, so each stop's departures stay sorted. Subway nodes are parent
+  stations; bus nodes are public `MTA_` stop IDs merged across the six bus feeds.
+  You cannot board at a stop with `pickup_type=1` or at a trip's last stop, or get
+  off at one with `drop_off_type=1` or at its first stop. Untimed stops drop the
+  trip rather than guess. The 109 used bus stops without public IDs are passed
+  through but are never a boarding, alighting or walking point, and are left out
+  of leg `stop_ids`. On a weekday the network has 13,967 nodes (496 stations,
+  13,471 bus stops, 115 of them source-only) and about 51,000 trips in 1,100
+  patterns.
+- **Y20 transfers and walking.** Subway-to-subway changes come only from MTA
+  `transfers.txt`. Same-station rows give the change time after arriving (180 s;
+  63 stations have a row). Other rows are in-complex walks with their
+  `min_transfer_time` (150 links). `transfer_type 3` is never used, and stations
+  without a row use 180 s. The bus feeds publish no transfers, so walks use a
+  documented distance model:
+
+  | Link | Rule | Time |
+  | --- | --- | --- |
+  | Same bus stop | change buses | 60 s |
+  | Bus ↔ bus | stops ≤ 250 m apart (straight line) | ceil(d × 1.3 / 1.2 m/s) + 60 s |
+  | Bus ↔ subway | stop ≤ 300 m from station coordinates; only when both modes are requested | ceil(d × 1.3 / 1.2 m/s) + 120 s |
+
+  The 1.3 factor allows for the street grid, 1.2 m/s is a conservative walking
+  speed, and the buffers cover crossing streets and station entrances, stairs and
+  fare control. Walks are not chained. This gives 84,614 bus and 10,494
+  bus↔subway walk links. Station coordinates are not entrances, so a cross-mode
+  walk is an estimate. `JOURNEY_CROSS_MODE_WALKS=0` turns cross-mode walks off,
+  and those requests then return 503.
+- **Y21 search.** Round-based RAPTOR over trips that can be boarded in the 24
+  hours after `departure_time`, across every service day that reaches the window
+  (overnight 24:00+ trips included). Unknown endpoints are 404. A catalog stop or
+  station with no scheduled trips, or a request date outside a feed's published
+  period, is 503. A connected-but-unreachable pair is 200 with
+  `no_path_reason:"no_service_in_window"`. The same endpoint gives a zero-length
+  journey.
+- **Y22 legs.** Ride legs give mode, public route, boarding/alighting
+  station/stop, scheduled times and every public stop passed. Walk legs have a
+  null route and no stop IDs. `transfers` is rides minus one.
+- **Y23 optimization and timing.** Round k is the earliest arrival with at most k
+  vehicles (at most 5), so the answer is the Pareto set over transfers and
+  arrival. Results are sorted by transfers, then arrival, then id, at most three.
+  Options that arrive more than 60 minutes after the earliest are dropped.
+  Times are timetable times only: no realtime delays and no rerouting.
+- **Y24 tests.** `tests/test_journeys.py` builds small subway and bus feeds
+  through the real importer. It covers direction, pickup restrictions, change
+  time, in-complex and prohibited transfers, bus walks, source-only stops,
+  cross-mode walks (on/off), same endpoint, no path, overnight service, the
+  24-hour window, ordering, the 60-minute rule, validation, 404/503 and the HTTP
+  endpoint. Where schedules are generated locally, it also plans
+  R20→A27 and MTA_308214→R20 on real data.
+
+Checked on the retained data for Wednesday 2026-11-25 at 09:00 EST: R20→A27 is Q
+to Times Sq-42 St, then the in-complex walk to 42 St-Port Authority (11 min).
+101→R20 is the 1 to Times Sq-42 St, then the N to 23 St (49 min, 1 transfer).
+MTA_308214 (B63) → R20 with bus and subway is a 7-minute walk to Union St, then
+the R direct (32 min) or R + N (24 min). The timetable for one hour's requests
+takes about 1 s to build for subway only and about 9 s with buses (the first
+request in an hour). After that a request takes well under a second, and the
+process peaks around 200 MB.

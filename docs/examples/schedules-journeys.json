@@ -278,7 +278,7 @@
     },
     {
       "operation": "journey-plan",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -535,7 +535,7 @@
           "response": {
             "error": "Transfer data is unavailable for this journey."
           },
-          "condition": "Controlled case requiring a cross-mode transfer with no validated connection data; do not turn unavailable coverage into no-path success."
+          "condition": "Cross-mode request while JOURNEY_CROSS_MODE_WALKS=0 (documented bus<->subway walks disabled); do not turn unavailable coverage into no-path success."
         }
       ]
     }

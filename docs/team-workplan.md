@@ -97,7 +97,7 @@ Keep [api-contract.md](api-contract.md) authoritative and update it with impleme
 | Y6 | Supply clearly labeled station, stop, route, geometry, arrival, schedule, and journey response fixtures early; refine as real adapters finish. | S4 | Complete: 39 operations / 188 synthetic cases and five UI replay scenarios refined against imported entities/geometry, with missing-ETA, overnight and coverage-unavailable states. 152 backend tests passed; see [fixture handoff](examples/README.md#y6-fixture-refinement--november-24-2026). Y5 diagnostics preserved; future adapters may require fixture updates with contract changes. |
 | Y7 | Document source, import date, validation, regeneration, and required deployment artifacts. | Y2, Y3, Y4, Y5 | Complete: [build runbook](data-build.md) covers provenance, clone/offline replay, refresh and deployment inventory; checksum verifier and local source bundle prepared. Full seven-feed replay matched retained payloads/database hashes; 159 tests passed. Runtime loading/deployment remain Y15/B22. |
 
-Y5 source retention is complete for both modes. Y14–Y18 can use the retained feeds; Y19–Y24 still require graph, transfer, coverage and timing validation. Regenerate the ignored local databases from the tracked manifest before schedule work.
+Y5 source retention is complete for both modes. Y14–Y18 use the retained feeds for schedules and Y19–Y24 for journey planning. Regenerate the ignored local databases from the tracked manifest before schedule work.
 
 ### B. Realtime integration
 
@@ -124,13 +124,13 @@ Y5 source retention is complete for both modes. Y14–Y18 can use the retained f
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| Y19 | Build directed connections from valid ordered stops, keeping mode/route/direction information. | Y5 | Connections follow real service paths. |
-| Y20 | Add valid transfers, including supported cross-mode links; document walking assumptions. | Y19 | Transfers do not rely only on similar names or arbitrary proximity. |
-| Y21 | Implement origin/destination search and explicit no-path behavior. | Y20, S4 | Returned paths are valid for the declared graph. |
-| Y22 | Group paths into journey legs with boarding/alighting stops, routes, and transfers. | Y21 | Frontend receives understandable instructions. |
-| Y23 | Define optimization and timing basis; use schedules if making time-aware claims. | Y21; Y17 for schedule-based timing | Complete: interface declares fewest-transfers optimization and schedule timing basis. Remaining: implement/validate that basis and document transfer/time assumptions; no unsupported live rerouting. |
-| Y24 | Test direction, transfers, same endpoints, disconnected paths, and each declared mode. | Y22, Y23 | Tests verify the supported routing scope. |
-| Y25 | Integrate and verify planner UI with Zhaorui. | Y22, Y23, C11 | A deployed user can request and inspect a real journey. |
+| Y19 | Build directed connections from valid ordered stops, keeping mode/route/direction information. | Y5 | Complete locally: patterns built from active GTFS trips keep stop order, route and pickup/drop-off rules; source-only bus stops traversed but never endpoints. See [Y19–Y24](mta-data.md#y19y24-journey-planning--november-25-2026). |
+| Y20 | Add valid transfers, including supported cross-mode links; document walking assumptions. | Y19 | Complete locally: subway changes from MTA transfers.txt only (type 3 excluded); bus↔bus (≤250 m) and bus↔subway (≤300 m, both modes) walks use a documented distance/speed/buffer model, switchable with `JOURNEY_CROSS_MODE_WALKS`. |
+| Y21 | Implement origin/destination search and explicit no-path behavior. | Y20, S4 | Complete locally: RAPTOR over trips boardable in the next 24 h; 404 unknown, 503 unscheduled/out-of-period, 200 [] with `no_service_in_window`, zero-length same endpoint. |
+| Y22 | Group paths into journey legs with boarding/alighting stops, routes, and transfers. | Y21 | Complete locally: ride legs carry public route, boarding/alighting target, scheduled times and stops passed; walk legs have null route. |
+| Y23 | Define optimization and timing basis; use schedules if making time-aware claims. | Y21; Y17 for schedule-based timing | Complete locally: Pareto set over (transfers, arrival) with at most 4 transfers, sorted fewest transfers first; options arriving >60 min after the earliest are dropped; schedule timing only, no live rerouting. |
+| Y24 | Test direction, transfers, same endpoints, disconnected paths, and each declared mode. | Y22, Y23 | Complete: `tests/test_journeys.py` (33 tests incl. real-data subway and bus+subway plans); 385 backend tests passed. |
+| Y25 | Integrate and verify planner UI with Zhaorui. | Y22, Y23, C11 | Backend ready: `POST /api/journeys` registered and tested locally. Remaining: C11 planner UI, schedule artifacts on Render (B22) and a deployed check. |
 
 ### E. Integration leadership
 

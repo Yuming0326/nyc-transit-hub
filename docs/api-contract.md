@@ -218,6 +218,30 @@ is prepared now; Y23 must implement that basis or agree on a documented contract
 revision before presenting time estimates. Fixtures are illustrative, not valid
 travel recommendations.
 
+**`/api/journeys` is implemented (Y19–Y24).** It plans over the retained GTFS
+schedules only (`source:"mta"`, `timing_basis:"schedule"`, `updated_at` is the
+schedule import time) and never calls realtime feeds. Details and the walking
+model are in [Y19–Y24](mta-data.md#y19y24-journey-planning--november-25-2026).
+
+- A vehicle must be boarded within 24 hours of `departure_time`; it may arrive
+  later. `departure_time` needs a timezone (`Z` or an offset). At most 5 vehicles
+  (4 transfers). `transfers` counts vehicles minus one; walks are not transfers.
+- Journeys are the best arrival for each transfer count (Pareto set), sorted by
+  transfers, then arrival_time, then id. A fewer-transfer option that arrives more
+  than 60 minutes after the earliest option is dropped, so a rare direct trip
+  hours later does not lead the list.
+- The first walk leg ends when the first vehicle leaves; later walks start when
+  the previous vehicle arrives. Journey times are those of the first and last leg.
+- Origin and destination modes must be in `modes` (400 otherwise). Unknown
+  station/stop is 404. A catalog station/stop with no scheduled trips, a request
+  date outside a feed's published period, or missing schedule artifacts is 503.
+  A cross-mode request while `JOURNEY_CROSS_MODE_WALKS=0` is 503 with
+  "Transfer data is unavailable for this journey."
+- `id` is a stable hash of the rides/walks and requested time (`j-` + 16 hex).
+- Performance: the first request in a given hour builds that hour's timetable
+  (about 1 s subway only, about 9 s with buses, locally); later requests in the
+  same hour take well under a second.
+
 ## Prepared favorites extension and migration
 
 Preserve `/api/favorites` exactly for existing station-only clients. Add a parallel
@@ -438,8 +462,8 @@ catalog responses use `source:"mta"` with `updated_at` = catalog `imported_at`.
 
 Subway plus six bus GTFS feeds are retained as indexed local SQLite/gzip artifacts
 with a tracked manifest. Y14–Y18 evaluate calendars/exceptions and service-day/DST
-conversion and serve `/api/schedules`; `/api/journeys` remains prepared. Y19–Y24 implement
-routing. Respect feed-qualified source IDs, pickup/drop-off and forbidden transfer
+conversion and serve `/api/schedules`; Y19–Y24 implement routing behind
+`/api/journeys`. Respect feed-qualified source IDs, pickup/drop-off and forbidden transfer
 records. There are 109 used source-only bus stop IDs and 47 discovery routes with
 no scheduled trips in these archives; missing coverage is unavailable, not proof
 of an empty service day. Bus transfer files are absent; walking/cross-mode links
