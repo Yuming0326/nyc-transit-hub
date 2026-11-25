@@ -4,7 +4,7 @@
   "routes": [
     {
       "id": "MTA NYCT_B63",
-      "name": "Illustrative B63 route",
+      "name": "Bay Ridge - Cobble Hill",
       "short_name": "B63"
     }
   ]

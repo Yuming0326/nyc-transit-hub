@@ -170,3 +170,43 @@ and multi-mode favorites coverage, remain separate from setup completion.
 - [Render Free services](https://render.com/docs/free)
 - [Render environment and secret files](https://render.com/docs/configure-environment-variables)
 - [Firebase Google sign-in](https://firebase.google.com/docs/auth/web/google-signin)
+
+## Y3 subway map artifact (local implementation)
+
+The subway map implementation requires the matching tracked generated trio:
+`catalog.json`, `stations.json`, and `geometry.json`. Ship them from the same
+import and restart/redeploy to use them. The map service rejects mismatched
+provenance with 503. This implementation has only local verification; no new
+hosted deployment or verification is claimed. Existing S7 completion is unchanged.
+
+## Y4 bus discovery artifacts (local import only)
+
+The matching `backend/app/data/generated/bus/catalog.json` and `geometry.json`
+snapshot is imported and validated locally. It contains no Bus Time key. Ship the
+pair with later bus API integration; importing these files alone does not enable
+bus endpoints or alter current deployment. Runtime source projection/loading is
+Y13, realtime integration is Y10–Y12, and hosted bus-key access still needs feature
+verification. The refresh CLI uses backend-only credentials; no new deployment
+is performed by Y4.
+
+## Y5 schedule packaging (required for future schedule features)
+
+The tracked schedules/manifest.json pins source ZIPs and per-feed compressed
+SQLite artifacts. The roughly 225 MB local databases are ignored by Git; they
+are not supplied by a plain clone or current deployment. Before activating future
+schedule/planner APIs, regenerate/verify the pinned set during an appropriate
+build/artifact-packaging step and provide read-only query databases to the backend.
+Do not rely on ephemeral runtime downloads or repeatedly decompress per request.
+Y7 documents a versioned build-time packaging convention in the
+[data-build runbook](data-build.md#required-deployment-artifacts). Y15/B22 still
+implement runtime paths/loading and verify hosted coverage before activation.
+Current S7 completion and hosted behavior are unchanged; Y5 performs no deployment.
+
+## Y7 data-artifact handoff
+
+Use the [runbook](data-build.md) and `scripts/check_data_artifacts.py` for the
+current file inventory, provenance locks, clean-clone/offline regeneration and
+build-time schedule packaging. Schedule loading/feature deployment remains
+Y15/B22; no production loader, host configuration change or deployment is claimed.
+The offline public-input bundle is prepared locally for Yuming to retain/share;
+it has not been uploaded. Its checksum and contents are recorded in the runbook.

@@ -85,6 +85,51 @@
             "error": "Service temporarily unavailable."
           },
           "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        },
+        {
+          "name": "overnight",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-24&station_id=R20"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": [
+              {
+                "id": "demo-overnight",
+                "trip_id": "demo-trip",
+                "route_id": "R",
+                "direction_id": "1",
+                "destination": null,
+                "stop_sequence": 1,
+                "service_time": "25:05:00",
+                "departure_time": "2026-11-25T06:05:00Z"
+              }
+            ]
+          },
+          "condition": "Synthetic 25:05 service-day departure: keep service_date November 24 while displaying November 25 local time. No schedule evaluator is implemented by this fixture."
+        },
+        {
+          "name": "calendar_exception_empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=subway&date=2026-11-26&station_id=R20"
+          },
+          "status": 200,
+          "response": {
+            "mode": "subway",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-26",
+            "timezone": "America/New_York",
+            "departures": []
+          },
+          "condition": "Deliberately simulated exception removes service in this mock. This is not a claim about actual MTA Thanksgiving service."
         }
       ]
     },
@@ -171,6 +216,63 @@
             "error": "Service temporarily unavailable."
           },
           "condition": "Required feed, catalog coverage, configuration, or storage unavailable."
+        },
+        {
+          "name": "overnight",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_308214"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-24",
+            "timezone": "America/New_York",
+            "departures": [
+              {
+                "id": "demo-overnight",
+                "trip_id": "demo-trip",
+                "route_id": "MTA NYCT_B63",
+                "direction_id": "1",
+                "destination": null,
+                "stop_sequence": 1,
+                "service_time": "25:05:00",
+                "departure_time": "2026-11-25T06:05:00Z"
+              }
+            ]
+          },
+          "condition": "Synthetic 25:05 service-day departure: keep service_date November 24 while displaying November 25 local time. No schedule evaluator is implemented by this fixture."
+        },
+        {
+          "name": "calendar_exception_empty",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-26&stop_id=MTA_308214"
+          },
+          "status": 200,
+          "response": {
+            "mode": "bus",
+            "source": "demo",
+            "updated_at": "2026-11-24T15:00:00Z",
+            "service_date": "2026-11-26",
+            "timezone": "America/New_York",
+            "departures": []
+          },
+          "condition": "Deliberately simulated exception removes service in this mock. This is not a claim about actual MTA Thanksgiving service."
+        },
+        {
+          "name": "schedule_coverage_unavailable",
+          "request": {
+            "method": "GET",
+            "path": "/api/schedules?mode=bus&date=2026-11-24&stop_id=MTA_300012&route_id=MTA%20NYCT_B102"
+          },
+          "status": 503,
+          "response": {
+            "error": "Scheduled service coverage is unavailable for this route."
+          },
+          "condition": "Known discovery route is listed in the Y5 manifest without scheduled trips; missing coverage is unavailable, not a valid empty service day."
         }
       ]
     },
@@ -404,8 +506,39 @@
             ],
             "no_path_reason": null
           }
+        },
+        {
+          "name": "transfer_coverage_unavailable",
+          "request": {
+            "method": "POST",
+            "path": "/api/journeys",
+            "body": {
+              "origin": {
+                "type": "station",
+                "mode": "subway",
+                "id": "R20"
+              },
+              "destination": {
+                "type": "stop",
+                "mode": "bus",
+                "id": "MTA_308214"
+              },
+              "departure_time": "2026-11-24T15:00:00Z",
+              "modes": [
+                "subway",
+                "bus"
+              ],
+              "optimization": "fewest_transfers"
+            }
+          },
+          "status": 503,
+          "response": {
+            "error": "Transfer data is unavailable for this journey."
+          },
+          "condition": "Controlled case requiring a cross-mode transfer with no validated connection data; do not turn unavailable coverage into no-path success."
         }
       ]
     }
-  ]
+  ],
+  "fixture_notes": "Synthetic API responses. Catalog entities and geometry are checked against Y2–Y4 imports; times, trip/vehicle IDs, alerts and journeys are invented for UI development. No future endpoint is registered by fixtures."
 }

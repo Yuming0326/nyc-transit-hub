@@ -1,0 +1,4 @@
+# Large derived databases are generated locally/build time; track manifest and importer.
+*.sqlite.gz
+*.sqlite
+*.tmp

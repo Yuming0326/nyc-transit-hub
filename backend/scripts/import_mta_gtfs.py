@@ -23,15 +23,20 @@ def main():
         response = requests.get(STATIC_URL, timeout=(5, 120))
         response.raise_for_status()
         content = response.content
-    catalog = build_catalog(content)
+    catalog = build_catalog(content, include_geometry=True)
+    geometry = catalog.pop('geometry')
     catalog['metadata'] = {'source_url': STATIC_URL, 'imported_at': datetime.now(timezone.utc).isoformat(),
                            'sha256': hashlib.sha256(content).hexdigest(),
                            'input_file': args.zip.name if args.zip else None}
     args.output.mkdir(parents=True, exist_ok=True)
-    for name, value in [('catalog.json', catalog), ('stations.json', catalog['stations'])]:
+    geometry['metadata'] = catalog['metadata']
+    for name, value in [('catalog.json', catalog), ('stations.json', catalog['stations']),
+                        ('geometry.json', geometry)]:
         target = args.output / name
         temporary = target.with_suffix('.tmp')
-        temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2) + '\n')
+        # Keep large shape coordinates compact; preserve readable station catalogs.
+        options = {'separators': (',', ':')} if name == 'geometry.json' else {'indent': 2}
+        temporary.write_text(json.dumps(value, ensure_ascii=False, **options) + '\n', encoding='utf-8')
         temporary.replace(target)
     print(f"Imported {len(catalog['stations'])} parent stations into {args.output}")
 

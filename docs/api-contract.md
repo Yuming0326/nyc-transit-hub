@@ -1,8 +1,8 @@
 # API contracts — team handoff
 
-Updated November 24, 2026. Setup owner: Yuming. Only the endpoints in
-“Implemented foundation” exist today. All subsequent sections are **prepared
-contracts for later implementation**. S4 interface definition is complete;
+Updated November 24, 2026. Setup owner: Yuming. The endpoints in
+“Implemented foundation” and “Implemented subway map” exist today. Other feature
+sections remain **prepared contracts for later implementation**. S4 interface definition is complete;
 source-field validation and deployed feature verification remain with Y/B/C owners.
 
 Machine-readable request/status/body examples for every operation are in
@@ -36,6 +36,39 @@ Favorites require a Firebase Bearer ID token. Missing/invalid token: 401; unconf
 - Connection/read timeouts default to 3.05/10 seconds per upstream request. Arrival/alert freshness defaults to 120/600 seconds. Environment settings are in `backend/.env.example`. A station served by multiple feed groups can involve several sequential requests.
 - Live directions are Northbound/Southbound/Unknown. Destination is the last stop reported in the feed, which may not be the actual terminal. Route-filtered alerts can include network-wide and stop-only notices; see the [MTA data reference](mta-data.md) for limitations.
 - The catalog is a manually refreshed snapshot. Cache is process-local; a multi-worker deployment requires shared caching. The frontend displays source labels from the actual responses.
+
+## Implemented subway map
+
+Implemented in Y3 for **live-mode subway geometry only**. Existing station and
+arrival responses are unchanged. No frontend map screen is added by Y3.
+
+| Method/path | Query | 200 response |
+| --- | --- | --- |
+| GET `/api/map` | required `mode=subway`; `route_id?`; `bbox?` = west,south,east,north | `{mode:"subway",source:"mta",updated_at,geometry:FeatureCollection,stations:[Station],stops:[]}` |
+
+Example: `GET /api/map?mode=subway&route_id=R&bbox=-74.1,40.6,-73.8,40.9`.
+`updated_at` is the geometry/catalog import timestamp, not realtime service
+freshness. The source contains all retained static trip variants; a displayed
+line does not prove that a branch is operating at the current date/time.
+
+Mode must be `subway` or `bus`; malformed/missing mode, empty route ID,
+duplicate filters and invalid bounds return 400. IDs preserve source case;
+unknown subway route IDs return 404. Valid nonintersecting bounds return 200 with
+empty arrays. Demo mode, bus geometry, missing/corrupt or mismatched geometry
+artifacts, or missing requested route coverage return 503 with `{error:message}`;
+they never return made-up geometry or failure-as-empty-success. If an unfiltered
+request lacks any declared route's geometry, it returns 503 rather than a partial
+map. Route-filtered requests require coverage only for that route.
+
+The geometry format/intersection rules below apply to this endpoint. A
+`shape_id` provenance property is also retained. Feature IDs are SHA-256 of the
+UTF-8 compact JSON array `[route_id,direction_id,shape_id]`; route/direction/shape
+associations are deduplicated, while branches/directions stay separate.
+Station points use the existing parent-station shape and route-membership filter;
+`stops` is empty for subway. Geometry comes from `generated/geometry.json`, is
+loaded lazily once per app, and must match the startup catalog's metadata.
+No MTA network request is made by this endpoint. Restart/redeploy after changing
+artifacts. Bus mode remains a later Y4/Y13 implementation.
 
 ## Prepared contract conventions
 
@@ -77,7 +110,8 @@ caller; 503 upstream/storage/configuration unavailable, stale/invalid feed, or
 unsupported required source coverage. No-data and unimplemented features must
 never masquerade as a healthy empty live response. Unexpected server failures
 return 500 with a generic message. Prepared endpoints are not registered yet;
-the running app currently returns 404 for them.
+the running app currently returns 404 for unregistered feature paths. `/api/map`
+is registered for subway geometry; bus mode explicitly returns 503.
 
 ## Prepared transit discovery, details, map and realtime
 
@@ -94,7 +128,6 @@ Responses list required fields; `Station`, `Route`, `Stop`, `Vehicle`, and
 | GET `/api/bus/routes/:route_id` | none | `{mode:"bus", source, updated_at, route:Route, stops:[Stop]}` |
 | GET `/api/bus/stops` | required `route_id`, `search?` (stop name or ID) | `{mode:"bus", source, route_id, stops:[Stop]}` (preserves prepared fixture) |
 | GET `/api/bus/stops/:stop_id` | none | `{mode:"bus", source, updated_at, stop:Stop, route_ids:[string]}` |
-| GET `/api/map` | required `mode`; `route_id?`; `bbox?` = west,south,east,north | `{mode,source,updated_at,geometry:FeatureCollection,stations:[Station],stops:[Stop]}` |
 | GET `/api/bus/stops/:stop_id/arrivals` | `route_id?`, `direction_id?` | `{mode:"bus",source,stop_id,updated_at,arrivals:[BusArrival]}` |
 | GET `/api/bus/vehicles` | required `route_id`; `direction_id?` | `{mode:"bus",source,updated_at,vehicles:[Vehicle]}` |
 | GET `/api/transit/alerts` | required `mode`; `route_id?`, `station_id?` for subway or `stop_id?` for bus | `{mode,source,updated_at,coverage:"route"\|"stop",alerts:[AffectedAlert]}` |
@@ -105,9 +138,12 @@ Route-detail arrays express membership, not a single universal travel order;
 branch/direction paths belong in geometry and schedules. Empty searches yield an
 empty array; absent detail entities yield 404, never a null entity.
 
+### Map geometry representation (implemented for subway; prepared for bus)
+
 Map geometry is GeoJSON `FeatureCollection` with `features:[Feature]`; route
 features use `LineString` or `MultiLineString` coordinates in **longitude, latitude**
-order, WGS84. Properties are `{id,mode,route_id,direction_id:string|null}`.
+order, WGS84. Properties are `{id,mode,route_id,direction_id:string|null,shape_id:string}` for
+imported subway shapes (`shape_id` is an additive source-provenance field).
 No invented straight lines substitute for unavailable geometry. `bbox` must have
 -180≤west<east≤180 and -90≤south<north≤90. Apply it by feature/point intersection;
 return entire intersecting route features, not clipped or reordered coordinates.
@@ -276,14 +312,14 @@ unavailable retrieval. B15–B16 validate source associations and completeness.
 
 ## Remaining source checks (implementation, not S4 blockers)
 
-- Y4/Y10: keyed Bus Time LineRef/stop discovery reconciliation, PublishedLineName,
+- Y10: reconcile realtime LineRef/MonitoringRef with the Y4 discovery catalog; validate PublishedLineName,
   stable dated visit identity, per-vehicle timestamps, missing ETA/distance values,
   SIRI error payloads, and vehicle coordinates/bearing. S6 proved access and ETA
   presence, not these mappings.
 - Y9/Y11/B17: actual bus alert source/access, affected stop/route IDs, network scope,
   and station associations before enabling precise subscription matching.
-- Y3–Y5/Y14–Y23: geometry/branch availability, bus catalog agency mappings,
-  calendar exceptions, overnight/DST conversion, valid transfers, schedule coverage.
+- Y5/Y14–Y23: calendar exceptions, overnight/DST conversion, valid transfers and
+  schedule coverage. Subway geometry and bus catalog/agency mappings were validated in Y3/Y4.
 - B13/B15–B16: authoritative status availability/precedence, equipment source
   access, equipment-to-parent-station associations and inventory completeness.
 
@@ -291,3 +327,34 @@ Prepared contracts and synthetic fixtures unblock UI/service work now. Review
 changes together during handoff; teammate acknowledgment is not falsely recorded
 as having occurred. Do not mark a feature live until its source checks and
 integration verification pass.
+
+## Bus data foundation (Y4; endpoints still prepared)
+
+The validated bus snapshot is under `backend/app/data/generated/bus/` with 392
+routes, 13,621 stops, route-stop relationships, ordered source groups and matching
+GeoJSON. Source IDs and agency references are reconciled. This is an import
+foundation, not an API implementation: the prepared bus endpoint shapes above
+are unchanged and bus map mode still returns 503. Y13 must project internal source
+records into those shapes. See [Y4 validation](mta-data.md#y4-bus-discovery-import--november-24-2026).
+
+## Schedule data foundation (Y5; endpoints still prepared)
+
+Subway plus six bus GTFS feeds are retained as indexed local SQLite/gzip artifacts
+with a tracked manifest. This does not implement `/api/schedules` or
+`/api/journeys`. Y14–Y18 must evaluate calendars/exceptions and service-day/DST
+conversion before responses use the prepared timing basis. Y19–Y24 implement
+routing. Respect feed-qualified source IDs, pickup/drop-off and forbidden transfer
+records. There are 109 used source-only bus stop IDs and 47 discovery routes with
+no scheduled trips in these archives; missing coverage is unavailable, not proof
+of an empty service day. Bus transfer files are absent; walking/cross-mode links
+must be sourced/defined later. See [Y5 audit](mta-data.md#y5-schedule-retention--november-24-2026).
+
+## Y6 frontend fixture handoff
+
+[Refined fixtures](examples/README.md#y6-fixture-refinement--november-24-2026)
+provide 39 operations / 188 cases plus five replay scenarios. Source entity IDs,
+metadata and selected whole geometries match imports; mocked predictions,
+schedules and journeys stay synthetic. Missing ETA/distance, overnight service
+hours, valid empty states and unavailable schedule/transfer coverage are distinct.
+Existing public response fields are unchanged. Y5 mapping/coverage diagnostics
+are retained; fixtures do not resolve gaps or enable prepared APIs.

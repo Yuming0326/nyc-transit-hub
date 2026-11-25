@@ -30,19 +30,22 @@
           "name": "success",
           "request": {
             "method": "GET",
-            "path": "/api/stations?search=illustrative"
+            "path": "/api/stations?search=Union%20Sq"
           },
           "status": 200,
           "response": {
             "stations": [
               {
                 "id": "R20",
-                "name": "Illustrative station",
+                "name": "14 St-Union Sq",
                 "routes": [
-                  "R"
+                  "N",
+                  "Q",
+                  "R",
+                  "W"
                 ],
-                "latitude": 40.735,
-                "longitude": -73.99
+                "latitude": 40.735736,
+                "longitude": -73.990568
               }
             ]
           }
@@ -51,7 +54,7 @@
           "name": "empty",
           "request": {
             "method": "GET",
-            "path": "/api/stations?search=illustrative"
+            "path": "/api/stations?search=fixture-no-match"
           },
           "status": 200,
           "response": {
@@ -427,5 +430,6 @@
         }
       ]
     }
-  ]
+  ],
+  "fixture_notes": "Synthetic API responses. Catalog entities and geometry are checked against Y2–Y4 imports; times, trip/vehicle IDs, alerts and journeys are invented for UI development. No future endpoint is registered by fixtures."
 }

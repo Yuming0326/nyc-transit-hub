@@ -1,4 +1,4 @@
-# MTA subway data reference
+# MTA transit data reference
 
 The subway importer and realtime adapter are integrated with Flask through
 `backend/app/services/transit_service.py`. Set `TRANSIT_MODE=live` to load the
@@ -6,10 +6,15 @@ imported station catalog and fetch official arrivals and alerts. Demo mode uses
 the separate development station subset. Live failures return explicit errors
 without substituting demo data.
 
-This reference covers the implemented subway data pipeline. See the
+This reference covers the implemented subway pipeline and the Y4 bus discovery
+import. Bus APIs remain later implementation; importing data does not enable them. See the
 [API contract](api-contract.md) for HTTP behavior, [shared setup](shared-setup.md)
 for proposed bus contracts and access checks, and [deployment](deployment.md)
 for hosting and verification evidence.
+
+For reproducible builds and required deployment files, use the
+[data-build runbook](data-build.md). This reference retains source-level audits,
+field mappings and known diagnostics.
 
 ## Official sources
 
@@ -18,22 +23,26 @@ for hosting and verification evidence.
 - Realtime base URL: `https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/`. Groups are defined in `mta_client.FEED_ROUTES`; alerts use `camsys%2Fsubway-alerts`.
 - [MTA subway GTFS-RT reference](https://www.mta.info/document/134521), [MTA alerts reference](https://www.mta.info/document/90881), and [GTFS-RT specification](https://gtfs.org/documentation/realtime/reference/).
 
-Scope is NYC Subway, including SI, excluding buses, LIRR, and Metro-North. Current subway requests do not attach an API key. Revalidate source access in the deployment environment.
+The subway adapter scope is NYC Subway, including SI, excluding buses, LIRR, and Metro-North.
+The separate bus discovery import is documented in Y4 below. Current subway requests do not attach an API key. Revalidate source access in the deployment environment.
 
 ## Storage and update strategy
 
-Static GTFS is a downloadable ZIP of related CSV tables, rather than a station lookup API. The importer downloads it when explicitly run, reads it in memory, and saves only the derived station/platform/route mappings needed by this application. It does not retain the ZIP, complete schedules, or stop_times table in the repository. No Firebase database is needed for this catalog.
+Static GTFS is a downloadable ZIP of related CSV tables, rather than a station lookup API. The importer downloads it when explicitly run, reads it in memory, and saves derived station/platform/route mappings and static map geometry needed by this application. Raw ZIPs remain outside the repository. Full schedule records are now retained
+separately as local compressed databases in Y5 below; they are not embedded in
+the station/map JSON artifacts. No Firebase database is needed for this catalog.
 
 The generated files are small enough to keep as a reviewed repository snapshot for this team project:
 
 - `backend/app/data/generated/catalog.json`: stations, platform lookups, and provenance.
 - `backend/app/data/generated/stations.json`: the station array in the existing API shape.
+- `backend/app/data/generated/geometry.json`: static subway GeoJSON with matching import metadata, loaded only for map requests.
 
 The browser obtains stations from Flask `/api/stations`. In live mode, the backend loads the local catalog once at startup. Do not download static GTFS on each page load or arrival request. Realtime arrivals and alerts are fetched separately from MTA and should use a short backend cache.
 
 **Current behavior: updates are manual.** There is no scheduler, automatic startup download, or file watcher. The importer uses the regular subway feed; it does not import the separate supplemented feed. Static route membership describes the imported schedule, not proof that a route serves a station right now.
 
-For this project, check for updates weekly and before a demo or deployment, rerun the importer, inspect the generated changes, and commit the approved snapshot. This cadence is a project recommendation, not an MTA requirement. After publishing a new catalog, restart/redeploy the backend so its in-memory catalog changes too. Keep stations and platform mappings from the same import together.
+For this project, check for updates weekly and before a demo or deployment, rerun the importer, inspect the generated changes, and commit the approved snapshot. This cadence is a project recommendation, not an MTA requirement. After publishing a new catalog, restart/redeploy the backend so its in-memory catalog changes too. Keep station arrays, platform mappings, route metadata and geometry from the same import together.
 
 For a deployed service, a scheduled job can download and validate a candidate dataset, compare its checksum, and publish a complete version only after validation succeeds. Keep the last successfully validated catalog if an update fails, report the failure, and retain its original import timestamp. Never replace a valid catalog with empty output. Realtime feed failures must still raise explicit errors rather than fall back to demo or static predictions. Automated scheduling, coordinated catalog publication, and runtime reload are follow-up work for the backend/deployment owner.
 
@@ -50,7 +59,321 @@ python scripts/import_mta_gtfs.py
 python scripts/import_mta_gtfs.py --zip /path/to/gtfs_subway.zip
 ```
 
-The importer reads stop_times incrementally and derives route membership through trips and stop_times. It preserves separate parent stops within a station complex. Each output file is replaced through a temporary file; the two outputs are not published as a single transactional pair, so run the importer offline before deployment rather than against files being read by a running service.
+The importer reads stop_times incrementally and derives route membership through trips and stop_times. It preserves separate parent stops within a station complex. Each output file is replaced through a temporary file; the three outputs are not published as a single transaction, so run the importer offline before deployment rather than against files being read by a running service.
+
+## Y1 static-import review — November 24, 2026
+
+**Complete:** reviewed the importer and regenerated a candidate from the official
+regular subway ZIP into a temporary directory. The review compared against the
+October 25 snapshot; [Y2 validation](#y2-source-validation--november-24-2026) below
+subsequently published the validated candidate.
+This review does not close Y2–Y5 or verify live transit behavior.
+
+| Check | Result |
+| --- | --- |
+| Fresh archive SHA-256 | `acb122715bd90aeacf61f4559722ccf0b7de9c63317200a6dd7480246488f1e6` |
+| Candidate import time | `2026-11-24T20:50:42.189175+00:00` |
+| Source feed version | `20261028-fall-2026-pick-with-long-term-supplements` |
+| Source feed date range | November 1, 2026–May 15, 2027; calendars still require service-day/exception evaluation |
+| Both tracked and candidate catalogs | 496 unique parent stations, 29 route IDs, 1,488 stop mappings (496 parents and 992 directional platforms) |
+| Structural checks, both catalogs | No duplicate station IDs, invalid/nonfinite coordinates, stations without routes, or mappings to unknown parents |
+| Generated pair | Candidate stations.json equals catalog.json stations array |
+| Repeat import from the same ZIP | Identical station/stop payloads and archive hash; import timestamps differ |
+| Backend regression suite | 39 tests passed with `.venv/bin/python -m pytest -q` |
+
+Coordinate range checks establish structure, not accuracy against source rows or
+station locations. At the time of Y1, the importer rejected only globally unusable output; Y2 added
+validation of duplicate input IDs, orphan references, coordinates and per-station
+route completeness.
+
+Candidate changes for Y2 review:
+
+- `G05`, `G05N`, `G05S`: source name changes from
+  `Jamaica Center-Parsons/Archer` to `Jamaica Center-York College`.
+- `A61`, `H01`, `H02`, `H03`: static route membership changes from `[A,H]` to `[A]`.
+- No station IDs are added/removed; all other station fields and stop mappings
+  match. Static membership changes are not proof of current realtime service.
+
+### Source data and gaps identified during Y1
+
+| Task | Existing foundation / gap confirmed by review |
+| --- | --- |
+| Y2 | Explicit parent mapping and route membership through trips/stop_times exist. Reconcile changed source rows, station/platform IDs, coordinates and route associations before publishing a refreshed pair. |
+| Y3 | ZIP contains 153,567 shape points and trip shape_id references. Importer discards these; retain ordered geometry and connect it to routes/directions before exposing maps. |
+| Y4 | Importer is subway-only. Bus catalogs, agency mappings, route-stop relationships and geometry require separate import/discovery work; synthetic bus fixtures are not imported data. |
+| Y5 | ZIP contains 20,310 trips, 562,943 stop_times, 3 calendar rows, 10 date exceptions and 613 transfers. Importer uses only trip route IDs and stop membership, discarding sequence/times, service IDs, calendars/exceptions and transfers. Preserve linked records for schedules/routing. |
+| Y7 | Source URL, import timestamp and ZIP checksum are recorded. Extend provenance to feed version/validity and future geometry/schedule/bus artifacts when implemented. |
+
+At Y1, the importer also discarded routes.txt display metadata; Y3 now retains
+route names/labels and geometry. Agency timezone (`America/New_York`) and feed
+validity/version remain unretained runtime data for schedule/provenance work.
+Output files are replaced individually, not transactionally; keep imports offline
+and publish a validated matching set. No raw ZIP or temporary candidate is added
+to the repository.
+
+To reproduce a candidate without changing the active catalog, run from `backend/`:
+
+```bash
+.venv/bin/python scripts/import_mta_gtfs.py --output /tmp/nyc-transit-y1-candidate
+.venv/bin/python -m pytest -q
+```
+
+To check repeatability, download the official ZIP once and invoke the documented
+`--zip /path/to/gtfs_subway.zip` option twice with different temporary output
+directories. Compare station/stop payloads separately from metadata timestamps.
+A later download may have a different source hash and must be reviewed anew.
+
+## Y2 source validation — November 24, 2026
+
+**Complete:** independently reconciled the validated candidate against the same
+official ZIP reviewed in Y1 and published both generated JSON files locally.
+Every parent station ID, source name, coordinate and route set matched the raw
+source tables; all 1,488 stop lookups matched explicit parent relationships and
+source names. Route membership was recomputed independently across all 562,943
+stop_times, 20,310 trips and 29 declared routes. The station array exactly matches
+the catalog's stations field, and metadata SHA-256 matches the downloaded ZIP.
+
+The published changes are the G05 station/platform rename and removal of H from
+A61/H01/H02/H03 static memberships listed in Y1. No station IDs or coordinates
+changed, so existing station favorites retain their identities. Static membership
+still does not establish current service. No deployment/restart is performed by
+this update; an already-running backend continues using its startup snapshot.
+
+The importer now rejects duplicate/empty stop, route and trip IDs; missing required
+tables/columns; invalid/nonfinite/out-of-range coordinates on parents or platforms;
+invalid parent relationships; unknown trip/stop/route references; and any parent
+station without route membership. This validation is for the regular subway feed,
+whose supported location types are parent stations and platforms (1 and 0).
+Other GTFS location types fail explicitly instead of being silently dropped.
+Coordinates are checked against source values and valid ranges, not a separate
+geographic survey. Stop directions retain the existing N/S suffix convention;
+unknown suffixes remain Unknown, and parents are always Unknown. Parent identity
+always uses the explicit relationship, not suffix truncation.
+
+Regression coverage includes unrelated platform/parent IDs, multi-route union,
+malformed source data, and a CLI failure that leaves both previous output files
+untouched. JSON writes explicitly use UTF-8 for consistent Windows behavior.
+Validation completes before any output write, but output-pair replacement remains
+nontransactional: run imports offline and publish both files together.
+
+Validation: **65 backend tests passed**. In-process Flask checks verified live
+station listing/search uses the new snapshot and demo mode still loads its
+separate station subset. These are catalog checks, not upstream realtime or
+hosted-browser verification. Y4 bus imports and Y5 schedule/transfer retention
+remain open; Y3 geometry is recorded below.
+
+## Y3 subway geometry — November 24, 2026
+
+**Complete for subway:** the CLI import now retains ordered official trip shapes,
+route display metadata and route/direction/shape associations. The matching
+`geometry.json` contains **261 LineString features, 153,567 points and all 29
+subway routes** (about 3.56 MB compact JSON). Coordinates are longitude/latitude;
+points sort by numeric shape_pt_sequence, not CSV order. Shared trip variants
+are deduplicated; separate shapes/directions remain separate features, including
+branches and express/local variants. Shape IDs are kept as provenance.
+
+Every generated feature's coordinates and route/direction/shape association were
+independently reconciled to raw shapes.txt and trips.txt from the same official
+ZIP audited in Y1/Y2. Catalog, stations and geometry were regenerated together
+with matching metadata and the existing source SHA-256. Station arrays and
+platform mappings are unchanged from Y2. The importer rejects malformed points,
+duplicate sequence values, missing/referenced-unknown shapes, invalid directions
+and shapes without at least two distinct points before writing any artifact.
+
+`GET /api/map?mode=subway` is implemented for live mode, with optional route_id
+and bbox filters as documented in the [API contract](api-contract.md#implemented-subway-map).
+It uses imported metadata time, never fetches live feeds, and returns whole lines
+that actually intersect the bounding box plus matching station points. It handles
+segments crossing a box even when both endpoints lie outside, and excludes lines
+whose envelopes overlap the box without a true intersection. No geometry is
+invented by connecting nearby stations. Static trip variants describe the import,
+not which branch is operating right now.
+
+Geometry loads lazily once per app and must match the startup catalog provenance.
+Invalid/missing artifacts or incomplete requested route coverage return 503.
+Valid empty intersections return 200; malformed filters return 400; unknown
+subway routes return 404. Demo and bus maps explicitly return 503. Existing
+station/arrival contracts are unchanged, and no frontend map screen is added.
+
+Validation: **104 backend tests passed**, including source-shape ordering and
+associations, invalid-geometry import preservation, CLI artifact consistency,
+route/bounds filtering and failure/empty semantics. Real-artifact in-process Flask
+checks verified map coverage for all 29 routes and route-filtered R geometry.
+No hosted deployment/restart or browser map verification is claimed. Publish all
+three generated files together, restart/redeploy to load them, and use route/bbox
+filters to bound map response sizes. Bus geometry import is complete in Y4 below; bus API/map integration remains Y13.
+Schedule retention is complete in Y5 below; date evaluation and routing remain later tasks. C4 owns frontend map implementation.
+
+## Y4 bus discovery import — November 24, 2026
+
+**Complete for static discovery:** imported every route returned by official
+[Bus Time OneBusAway discovery](https://bustime-classic.mta.info/wiki/Developers/OneBusAwayRESTfulAPI).
+Preserved exact agency-qualified IDs instead of constructing them from display
+labels. Route agencies are `MTA NYCT` and `MTABC`; `MTA` is a separate source
+agency reference and stop namespace. This covers the discovery snapshot, not
+commuter rail or a guarantee that every route is operating now.
+
+| Source/artifact check | Result |
+| --- | --- |
+| Requests captured | 396: agency coverage, three agency route lists, and 392 route-stop responses |
+| Routes | 392: 300 MTA NYCT and 92 MTABC; source bus types 3/711 retained |
+| Stops | 13,621 unique MTA-qualified source IDs with names, coordinates, agency references and route memberships |
+| Stop groups | 776; retain source order, group ID/type, destination, direction where explicitly supplied and geometry references |
+| Geometry | 9,930 GeoJSON lines / 366,819 points, covering all 392 routes |
+| Direction coverage | 887 direction-0 lines, 967 direction-1 lines, 8,076 lines without a source-supported direction (null) |
+| Source response time range | `2026-11-24T21:26:04.640000+00:00` through `2026-11-24T21:26:13.171000+00:00` |
+| Canonical captured-snapshot SHA-256 | `b1a92a42f89e83f72c8211f3d57a031bbb80d983c859b86628242073535a4512` |
+| Relationship checks | All route/stop/agency and group/geometry references reconcile; no incomplete routes or unresolved advertised route IDs |
+| Representative source mapping | `MTA_308214` is present on `MTA NYCT_B63`; leading zeros, spaces and source case stay intact |
+| Offline repeat | Identical catalog/geometry payloads apart from import metadata timestamps |
+| Regression suite | 128 backend tests passed |
+
+Independent source reconciliation checked every route-stop membership, stop name
+and coordinate, source stop-group order/direction, and geometry link. Re-encoding
+every retained line reproduced an official polyline string. One Q3 source
+polyline encodes two identical points at `[-73.77366,40.65977]`: it is omitted as a
+zero-length line, with `degenerate_polyline_counts: {"MTA NYCT_Q3":1}` recorded in
+coverage. Q3 still has usable source geometry. Malformed encodings, count
+mismatches, invalid coordinates and broken references fail validation; they are
+not silently discarded.
+
+### Artifacts and interface boundary
+
+`backend/app/data/generated/bus/catalog.json` (about 6.27 MB) contains `agencies`,
+`routes`, `stops`, `route_stop_ids`, `patterns`, `coverage` and `metadata`.
+`geometry.json` (about 9.74 MB) is the matching GeoJSON FeatureCollection with
+metadata. Group geometry is associated with a direction only when the source
+explicitly gives direction 0/1; remaining route polylines retain null direction.
+Neither branch connections nor travel directions are invented. Source group
+stop order is not a substitute for trip-specific scheduled stop_times in Y5.
+
+Internal route/stop records retain extra source references. Y13 must project
+these into the prepared public shapes (for example route `{id,name,short_name}`
+and stop `{id,name,latitude,longitude}`), rather than changing existing clients.
+`route_ids` on stops is derived from actual route queries; `source_route_ids`
+preserves the source's advertised IDs for diagnostics. Unknown advertised IDs
+would be reported separately and never create guessed catalog records.
+
+Both artifacts carry matching source URL, import time, canonical snapshot hash,
+response count and source-response time range. The capture was a sequence of
+static discovery responses, not an atomic provider version. Publish/review the
+pair together offline; file replacements are not a two-file transaction.
+No API key, credential-bearing URL or raw discovery dump is stored in the repo.
+Neither artifact is loaded by runtime APIs yet. Bus discovery/details/map
+endpoints remain Y13, arrivals/vehicles Y10, alerts Y11, and schedule APIs Y14–Y18 (retention is Y5 below).
+The existing bus-map request still returns explicit 503 until integration.
+
+### Refresh and replay
+
+Owner: Yuming. Check weekly and before demos/deployments; no automatic refresh is
+configured. Use the backend-only `MTA_BUS_TIME_API_KEY` in ignored `.env` or the
+environment; never pass it in a public request or CLI argument. From `backend/`:
+
+```bash
+.venv/bin/python scripts/import_bus_catalog.py --source-dir /tmp/nyc-bus-source --save-snapshot /tmp/nyc-bus-snapshot.json --output /tmp/nyc-bus-candidate
+.venv/bin/python scripts/import_bus_catalog.py --snapshot /tmp/nyc-bus-snapshot.json --output /tmp/nyc-bus-repeat
+.venv/bin/python -m pytest -q
+```
+
+Review the matching candidate pair and coverage diagnostics before publishing
+under `app/data/generated/bus/`; running without --output uses that tracked
+location. The importer bounds concurrency to three static requests, retries
+transport/429/5xx failures, rejects truncated/error responses and sanitizes
+request diagnostics. A failed import does not overwrite previous valid outputs.
+Optional `--resume` reuses captured responses less than six hours old; response
+time-range metadata exposes the actual source times. Saved source captures stay
+outside the repository and support replay without a key or network request.
+
+## Y5 schedule retention — November 24, 2026
+
+**Complete for source retention:** retained the official subway archive and all
+six [official bus GTFS archives](https://www.mta.info/developers) (`bx`, `b`, `m`,
+`q`, `si`, `busco`) as validated, indexed SQLite databases compressed with gzip.
+This prepares data for Y14–Y24; it does not implement date evaluation, UTC/DST
+conversion, schedule endpoints, transfers/routing algorithms or a planner UI.
+
+| Retained source records (summed over feed namespaces) | Count |
+| --- | --- |
+| Trips | 250,842 |
+| Ordered stop_times | 7,999,282 |
+| Calendar records | 139 |
+| Date exceptions | 1,559 |
+| Transfers | 613 (subway); none of the six bus archives supplies transfers.txt |
+| Stop-time records beyond 24:00 | 239,030, preserved without wrapping hours |
+| Untimed source records | 0 in these archives; supported/tested for intermediate timepoint=0 records |
+| Backend tests | 148 passed |
+
+Every retained row/column was independently reconciled with raw CSV source rows
+in all seven archives. Import checks cover unique IDs/stop sequences, linked
+route/trip/service/stop references, service calendars/exceptions, monotonic known
+trip times, transfer restrictions/minimum times, positive frequency headways and
+America/New_York timezone. Required fields cannot silently disappear. A failed
+feed leaves the previous published set intact because all feeds stage and
+validate before publication. Publication is offline, not a multi-file atomic
+transaction; the manifest publishes last.
+
+### Storage, schema and reproducibility
+
+`backend/app/data/generated/schedules/manifest.json` is tracked. It records each
+feed's official URL, source ZIP and compressed artifact SHA-256, exact source
+headers, row counts, feed_info version/validity, calendars, overnight counts and
+crosswalk diagnostics. The referenced `*.sqlite.gz` files are generated locally
+and ignored by the directory's .gitignore: approximately 225 MB compressed in
+total, avoiding large binary commits. Raw ZIPs are also kept outside the repo.
+The Y7 runbook documents regeneration/packaging; later deployment work must
+implement it for runtime schedule features; current deployment does not load them.
+
+Each database retains source columns in agency/routes/stops/trips/stop_times,
+calendar/calendar_dates and, when supplied, transfers/frequencies/feed_info.
+Identifiers stay as source strings. `stop_sequence` is numeric for correct order;
+arrival/departure text is preserved alongside `arrival_seconds`/`departure_seconds`
+(integer offsets from service-day origin, not UTC timestamps). Blank intermediate
+times stay null; the importer never interpolates. Pickup/drop-off restrictions,
+headsigns, directions, block/shape references and optional transfer restrictions
+remain available. `services` is the union of calendar/exception service IDs.
+Unique identity indexes and a `(stop_id,departure_seconds)` index support later
+queries. Do not treat source offsets as local-clock timestamps across DST: Y16
+must implement GTFS service-day conversion correctly.
+
+The identity of a trip/service/stop record is **(feed_id,source_id)**, not a
+bare ID merged across borough feeds. Each per-feed database has `entity_links`
+with type, source ID, public ID or null, and matching basis. Subway stops use
+explicit parent_station; bus routes first resolve exact agency-qualified source
+IDs, then an unambiguous exact agency/display-label crosswalk. Bus stops resolve
+unambiguous official discovery stop codes. Names/nearby coordinates never create
+new identities. The manifest pins the Y4 discovery snapshot used for mapping.
+
+All bus routes actually referenced by trips resolve to discovery IDs. There are
+109 distinct used GTFS bus stop IDs without discovery matches; their records and
+ordered trip links remain retained, with null public IDs. Forty-seven discovery
+routes have no scheduled trips in this GTFS set. The manifest lists these gaps;
+Y13/Y15/Y19 must reconcile coverage or return explicit unavailable states rather
+than claim full scheduled coverage, invent IDs, or turn missing coverage into a
+normal empty service day. Unused route definitions without a match are recorded
+separately. Bus transfers are absent, not proof of no possible connection: Y20
+must source/define valid transfers and walking assumptions, including cross-mode
+links. Subway transfer_type=3 prohibitions are retained and must never become
+allowed graph edges.
+
+### Generate the pinned schedule set
+
+From backend/ (network access required unless matching ZIPs are cached):
+
+```bash
+.venv/bin/python scripts/import_schedules.py --from-manifest app/data/generated/schedules/manifest.json --download-dir /tmp/nyc-schedule-zips
+.venv/bin/python -m pytest -q
+```
+
+This downloads only whitelisted official feeds, verifies pinned source checksums
+and builds the local databases. A changed upstream ZIP fails explicitly: review a
+new snapshot with repeated `--feed name=/path/to/official.zip` arguments instead
+of silently changing a pinned build. For full refresh supply all seven feed
+names (`subway`, `bx`, `b`, `m`, `q`, `si`, `busco`), a matching --bus-catalog if
+needed, and --output for candidate review. Partial-feed manifests describe only
+those feeds; the manifest is the authority for which databases belong to a set.
+Do not stage the ignored databases. Decompress an artifact into a temporary
+location with gzip, verify its manifest checksum, and open it with Python sqlite3
+for audit or later service integration. No API key is needed for GTFS downloads.
 
 ## Runtime integration
 
@@ -105,3 +428,18 @@ at that time. Current integration evidence and remaining checks belong in
 [shared setup](shared-setup.md) and [deployment](deployment.md).
 
 Earlier delivery reports are preserved in the [documentation archive](archive/2026-10/README.md).
+
+## Y7 reproducible data handoff — November 24, 2026
+
+Sources, import dates, validations, refresh/replay steps and deployment artifact
+requirements are documented in the [data-build runbook](data-build.md).
+`generated/data-manifest.json` pins the retained JSON/manifests; the offline
+public-input bundle and its checksum enable source replay without a Bus Time
+key. `check_data_artifacts.py` verifies inventories, provenance alignment, optional
+local database hashes and extracted input checksums. Corrupted/unreviewed changes
+fail explicitly. Known Y4/Y5 diagnostics are retained. Future runtime schedule
+loading/packaging execution remains Y15/B22; no deployment is performed here.
+
+Y7 full offline replay passed: station/map/bus payloads matched apart from import
+metadata, and all seven compressed schedule hashes/counts/diagnostics matched.
+Inventory/input/local-artifact verification passed; 159 backend tests passed.

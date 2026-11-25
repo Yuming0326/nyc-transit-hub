@@ -62,7 +62,7 @@ npm run build
 
 Frontend Firebase config is public app identification. Admin credentials are secrets and must never appear in frontend variables or git. `.env` and service-account files are ignored.
 
-## Refresh the static MTA catalog
+## Refresh the static subway catalog
 
 **Owner: Yuming (transit data owner). Check weekly and before every demo or deployment.**
 This is a manual checklist; no scheduled refresh is configured.
@@ -77,11 +77,45 @@ This is a manual checklist; no scheduled refresh is configured.
    cd ..
    ```
 
-3. Review both generated files under `backend/app/data/generated/`. Check station IDs, route membership, coordinates, and catalog metadata. Keep the station array and platform mappings from the same import together. If import or validation fails, keep the previous valid snapshot and investigate before committing.
+3. Review all three generated files (catalog.json, stations.json, geometry.json) under `backend/app/data/generated/`. Check station IDs, route membership, coordinates, and catalog metadata. Keep station arrays, platform mappings, route metadata, and geometry from the same import together. If import or validation fails, keep the previous valid snapshot and investigate before committing.
 4. Commit the reviewed changes on the branch and open a pull request into `main`.
 5. After merge, the backend owner restarts/redeploys the service to load the new catalog. Live endpoints require `TRANSIT_MODE=live`.
 
-Only derived mappings are stored; the original ZIP and complete schedules are not retained. Arrivals and alerts use separate realtime feeds. See the [MTA data reference](docs/mta-data.md) for sources, field mappings, update policy, and runtime integration details.
+Only derived station/route mappings and map geometry are stored; raw ZIPs stay outside the repo. Complete schedules are retained separately as local generated databases below. Arrivals and alerts use separate realtime feeds. See the [MTA data reference](docs/mta-data.md) for sources, field mappings, update policy, and runtime integration details.
+
+## Refresh the bus discovery catalog
+
+Y4 imports official Bus Time routes/stops, agency references, source stop groups
+and geometry into `backend/app/data/generated/bus/`. Public bus APIs remain Y13.
+Use the backend-only Bus Time key in ignored `.env`; never put it in an example
+file or commit. From `backend/`, run `python scripts/import_bus_catalog.py`.
+For candidate review, source capture/replay and validation, follow the
+[Y4 import instructions](docs/mta-data.md#y4-bus-discovery-import--november-24-2026).
+Review and publish catalog.json and geometry.json together; failed validation
+keeps the previous outputs. No automated refresh is configured.
+
+## Generate retained schedules
+
+Y5 retains subway and six official bus GTFS feeds in indexed compressed SQLite
+files. The source/count/checksum manifest is tracked at
+`backend/app/data/generated/schedules/manifest.json`; the large databases are
+ignored and must be generated locally or packaged during later deployment work.
+From `backend/`:
+
+```bash
+.venv/bin/python scripts/import_schedules.py --from-manifest app/data/generated/schedules/manifest.json --download-dir /tmp/nyc-schedule-zips
+```
+
+See [Y5 schema, coverage limits and refresh instructions](docs/mta-data.md#y5-schedule-retention--november-24-2026).
+Schedule/journey APIs are still later tasks; importing records does not enable them.
+
+## Data build handoff
+
+Start with the [data-build runbook](docs/data-build.md) for source/version records,
+offline replay, pinned schedule generation and the required deployment artifacts.
+From `backend/`, run `python scripts/check_data_artifacts.py`; add `--schedules`
+after generating the local databases. The committed data inventory detects
+unreviewed artifact changes without external requests or credentials.
 
 ## Next steps
 See [architecture](docs/architecture.md), [API contract](docs/api-contract.md), and [team workplan](docs/team-workplan.md). Subway static GTFS and realtime feeds are integrated. See [deployment](docs/deployment.md) for the hosted application and Firebase setup; the team workplan tracks remaining features.

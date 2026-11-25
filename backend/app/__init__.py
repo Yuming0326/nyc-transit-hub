@@ -10,9 +10,11 @@ def create_app(test_config=None):
         app.config.update(test_config)
     from .services.transit_service import init_transit
     init_transit(app)
+    from .services.map_service import init_map
+    init_map(app)
     CORS(app, resources={r'/api/*': {'origins': app.config['FRONTEND_ORIGIN']}})
-    from .routes import health, stations, arrivals, alerts, favorites
-    for module in (health, stations, arrivals, alerts, favorites):
+    from .routes import health, stations, arrivals, alerts, favorites, maps
+    for module in (health, stations, arrivals, alerts, favorites, maps):
         app.register_blueprint(module.bp, url_prefix='/api')
 
     @app.errorhandler(HTTPException)

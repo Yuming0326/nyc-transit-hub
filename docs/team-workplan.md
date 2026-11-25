@@ -79,7 +79,7 @@ The reviewed app uses Flask and station-based APIs, not the old midpoint slide's
 - GET /api/alerts?route_id=...
 - GET/POST /api/favorites and DELETE /api/favorites/:station_id — existing station-only contract.
 
-The existing station favorites contract is preserved. Its parallel v2 extension and migration, plus new transit/status/schedule/equipment/journey/subscription/notification interfaces, are **defined in S4 and prepared for later implementation**, not registered endpoints.
+The existing station favorites contract is preserved. Live subway map geometry is implemented in Y3. Its bus mode, parallel v2 favorites/migration, and other new transit/status/schedule/equipment/journey/subscription/notification interfaces are **defined in S4 and prepared for later implementation**, not implemented features.
 
 Keep [api-contract.md](api-contract.md) authoritative and update it with implementation changes. Existing arrival polling waits 30 seconds after a polling request completes; coordinate refresh changes and respect each source's usage constraints.
 
@@ -89,15 +89,15 @@ Keep [api-contract.md](api-contract.md) authoritative and update it with impleme
 
 | ID | Small task | Depends on | Completion check |
 | --- | --- | --- | --- |
-| Y1 | Run/review the current static import and inspect generated artifacts. | S1 | Existing outputs and gaps are understood. |
-| Y2 | Validate subway station IDs, parent/platform mappings, routes, and coordinates. | Y1, S3 | Representative records reconcile to source data. |
-| Y3 | Retain/import route geometry and expose it in the agreed representation. | Y1, S4 | Geometry can be retrieved by route. |
-| Y4 | Import bus routes/stops, route-stop relationships, geometry, and agency references. | S3, S4 | Bus records have consistent identifiers and relationships. |
-| Y5 | Preserve schedule trips, ordered stops, calendars, exceptions, and transfer information needed by downstream features. | Y1, Y4 | Schedule and connection records remain linked. |
-| Y6 | Supply clearly labeled station, stop, route, geometry, arrival, schedule, and journey response fixtures early; refine as real adapters finish. | S4 | Complete: initial synthetic fixtures for discovery, details, geometry, arrivals/vehicles, schedules and journeys in docs/examples. Remaining: refine against real adapters and validate source mappings. |
-| Y7 | Document source, import date, validation, regeneration, and required deployment artifacts. | Y2, Y3, Y4, Y5 | Another teammate can reproduce the data build. |
+| Y1 | Run/review the current static import and inspect generated artifacts. | S1 | Complete: fresh official ZIP import/repeatability and tracked/candidate artifacts reviewed; 39 backend tests passed. See [Y1 audit](mta-data.md#y1-static-import-review--november-24-2026). Five changed station records identified; source validation and publication completed in Y2. Subway geometry completed in Y3 and bus discovery import in Y4; schedule retention completed in Y5; schedule evaluation/routing remain later work. |
+| Y2 | Validate subway station IDs, parent/platform mappings, routes, and coordinates. | Y1, S3 | Complete: all 496 stations and 1,488 stop mappings reconciled to raw GTFS, including route membership; validated matching catalog pair refreshed locally. Import validation/regressions added; 65 backend tests passed. See [Y2 validation](mta-data.md#y2-source-validation--november-24-2026). No deployment performed. |
+| Y3 | Retain/import route geometry and expose it in the agreed representation. | Y1, S4 | Complete for subway: 261 validated GeoJSON shapes across 29 routes retained; live GET /api/map supports route/bbox filters. 104 backend tests passed; see [Y3 validation](mta-data.md#y3-subway-geometry--november-24-2026). Bus geometry import completed in Y4; bus map API remains Y13 and frontend map remains C4. No deployment performed. |
+| Y4 | Import bus routes/stops, route-stop relationships, geometry, and agency references. | S3, S4 | Complete: 392 source routes, 13,621 stops, 776 ordered groups and 9,930 geometry features imported with validated agency/route/stop links. 128 backend tests passed; see [Y4 validation](mta-data.md#y4-bus-discovery-import--november-24-2026). One source-degenerate Q3 line reported/omitted. Public bus APIs remain Y13; realtime remains Y10–Y12. |
+| Y5 | Preserve schedule trips, ordered stops, calendars, exceptions, and transfer information needed by downstream features. | Y1, Y4 | Complete: subway + six bus GTFS feeds retained as validated indexed local artifacts with tracked manifest; 250,842 trips, 7,999,282 stop_times, calendars/exceptions and 613 subway transfers. 148 tests passed; see [Y5 audit](mta-data.md#y5-schedule-retention--november-24-2026). Source-only stop/coverage gaps explicit; bus transfer data absent. Evaluation/APIs/routing remain Y14–Y24. |
+| Y6 | Supply clearly labeled station, stop, route, geometry, arrival, schedule, and journey response fixtures early; refine as real adapters finish. | S4 | Complete: 39 operations / 188 synthetic cases and five UI replay scenarios refined against imported entities/geometry, with missing-ETA, overnight and coverage-unavailable states. 152 backend tests passed; see [fixture handoff](examples/README.md#y6-fixture-refinement--november-24-2026). Y5 diagnostics preserved; future adapters may require fixture updates with contract changes. |
+| Y7 | Document source, import date, validation, regeneration, and required deployment artifacts. | Y2, Y3, Y4, Y5 | Complete: [build runbook](data-build.md) covers provenance, clone/offline replay, refresh and deployment inventory; checksum verifier and local source bundle prepared. Full seven-feed replay matched retained payloads/database hashes; 159 tests passed. Runtime loading/deployment remain Y15/B22. |
 
-Y5 can start for subway data before Y4 finishes; complete both modes before closing the task.
+Y5 source retention is complete for both modes. Y14–Y18 can use the retained feeds; Y19–Y24 still require graph, transfer, coverage and timing validation. Regenerate the ignored local databases from the tracked manifest before schedule work.
 
 ### B. Realtime integration
 
@@ -108,7 +108,7 @@ Y5 can start for subway data before Y4 finishes; complete both modes before clos
 | Y10 | Integrate bus arrival predictions and supported vehicle positions. | S6, Y4, S4 | A real route/stop returns meaningful live results. |
 | Y11 | Integrate bus alerts and map affected route/stop references. | Y4, S6, S4 | Notices can be matched to imported entities. |
 | Y12 | Add/reuse timeout, freshness, validated caching, and explicit-error behavior for bus requests. | Y10, Y11 | No fictional fallback or failure-as-normal behavior. |
-| Y13 | Connect agreed search/detail/arrival/map-data endpoints to the service layer. | S4, Y2, Y3, Y4, Y8, Y10, Y12 | Complete: existing subway search/arrivals wiring. Remaining: prepared detail/map/bus endpoints; validate and integrate real normalized sources. |
+| Y13 | Connect agreed search/detail/arrival/map-data endpoints to the service layer. | S4, Y2, Y3, Y4, Y8, Y10, Y12 | Complete portions: existing subway search/arrivals wiring and Y3 subway map endpoint. Remaining: prepared detail/route-discovery and bus endpoints; validate and integrate real normalized sources. |
 
 ### C. Schedules
 

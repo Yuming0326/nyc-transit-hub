@@ -122,7 +122,8 @@ within the freshness window. Four visits included an ETA and two lacked one.
 The summary confirms the listed journey fields were present. It does not show
 the exact returned stop or route IDs, route labels, per-visit timestamp values,
 distance text, or the fields needed to validate a stable visit ID. Those checks
-remain assigned to Y4/Y10 adapter field validation; they do not block S4 definitions.
+remain assigned to Y10 realtime validation; Y4 has since validated static discovery
+IDs/relationships. They do not block S4 definitions.
 
 ## Shared identifiers
 
@@ -287,12 +288,12 @@ polling/timeout/cleanup flow. Reconciled B/C task portions are recorded in the
 - **S5 browser follow-up:** separately demonstrate successful empty arrivals and
   alerts in the browser. Local automated cases already passed. This does not
   reopen S7 or prevent interface-based development.
-- **Y4/Y10:** confirm actual bus route/stop IDs, route labels, stable visit identity,
+- **Y10:** reconcile realtime route/stop IDs with the imported discovery catalog; validate route labels, stable visit identity,
   nullable ETA/distance, per-visit timestamps, vehicle positions/bearing, SIRI
   errors and freshness behavior against keyed responses.
 - **Y9/Y11/B17:** validate actual bus alert access and affected-route/stop/station
   associations before precise matching and notifications.
-- **Y3–Y5/Y14–Y23:** validate geometry, agency mapping, schedules/calendars,
+- **Y5/Y14–Y23:** geometry and bus agency/stop discovery mappings are validated in Y3/Y4; validate schedules/calendars,
   overnight/DST handling, transfers and routing coverage.
 - **B13/B15–B16:** validate authoritative status fields, equipment source access,
   inventory completeness and station mappings. Unsupported evidence remains
@@ -304,3 +305,49 @@ No concrete credential/access blocker to the completed shared setup is recorded.
 These source checks are later implementation validation, not unfinished S4
 interface definitions. The next coordination gate is the shared Git baseline;
 no commit, push, merge, deployment or implementation branch is created here.
+
+## Implementation update: Y3
+
+Live-mode subway `GET /api/map?mode=subway` is now implemented locally with
+route/bounding-box filters and matching generated geometry. See the
+[API contract](api-contract.md#implemented-subway-map) and
+[Y3 validation](mta-data.md#y3-subway-geometry--november-24-2026).
+Bus geometry and the other prepared feature endpoints remain later work.
+This does not claim a new hosted deployment or close S5's browser follow-up.
+
+## Implementation update: Y4
+
+The bus discovery catalog and geometry import are complete locally. See
+[Y4 source validation](mta-data.md#y4-bus-discovery-import--november-24-2026).
+Full source route IDs, stop namespace/agency references and route-stop membership
+are now validated, including the B63/MTA_308214 relationship. Actual realtime
+LineRef/MonitoringRef, stable visit IDs, ETA/vehicle timestamps and source errors
+still need Y10 validation. Public bus endpoints remain prepared for Y13; no new
+hosted deployment, realtime integration or S5 browser verification is claimed.
+
+## Implementation update: Y5
+
+Schedule source retention is complete for subway and six bus GTFS feeds; the
+[Y5 audit](mta-data.md#y5-schedule-retention--november-24-2026) records source
+versions, preserved links, coverage gaps and regeneration instructions. Large
+indexed databases are local generated files, not Git artifacts. Schedule date
+resolution, timezone conversion, APIs and routing remain separate Y14–Y24 work;
+source-only stops/missing schedule coverage must stay explicit. S4/S7 completion
+and S5's browser follow-up are unchanged.
+
+## Implementation update: Y6
+
+[Frontend fixture handoff](examples/README.md#y6-fixture-refinement--november-24-2026)
+is complete with source-grounded entity/geometry examples, synthetic arrival,
+schedule and journey states, and five replay scenarios. Y5 records/diagnostics
+remain intact. This is fixture delivery, not live adapter validation or browser
+verification; S5's browser follow-up and later feature implementation remain open.
+
+## Implementation update: Y7
+
+The [data-build handoff](data-build.md) documents sources/provenance, exact-source
+offline replay, regeneration and deployment artifacts. A checksum inventory and
+local verifier cover the retained JSON/manifests, optional schedule databases and
+source inputs. The offline input bundle is local and must be retained/shared by
+Yuming; no credentials or external upload are included. Feature activation and
+hosted verification remain later implementation work; S5/S7 status is unchanged.
