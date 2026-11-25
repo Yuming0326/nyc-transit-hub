@@ -1,0 +1,66 @@
+{
+  "task": "Y11",
+  "source": "MTA GTFS-RT camsys/bus-alerts",
+  "checked_at": "2026-11-25T14:43:53.784971+00:00",
+  "catalog_imported_at": "2026-11-24T21:28:56.741459+00:00",
+  "passed": true,
+  "feed_timestamp": "2026-11-25T14:41:06+00:00",
+  "feed_age_seconds": 168.0,
+  "entities": 184,
+  "active_alerts": 106,
+  "selector_shapes": {
+    "agency_id,route_id": 875
+  },
+  "agencies": {
+    "MTA NYCT": 563,
+    "MTABC": 312
+  },
+  "scopes": {
+    "route": 106
+  },
+  "impacts": {
+    "unknown": 106
+  },
+  "mapped_route_ids": 121,
+  "mapped_stop_ids": 0,
+  "unmapped_route_ids": [],
+  "unmapped_stop_ids": [],
+  "filter_examples": {
+    "route": {
+      "route_id": "MTA NYCT_Q27",
+      "matched": 1,
+      "coverage": "route"
+    }
+  },
+  "sample": {
+    "id": "lmm:alert:277870:31",
+    "header": "Q27 buses are detoured in both directions due to roadwork at 47th Ave/Hollis Ct Blvd.\nBuses will operate via Hollis Ct Blvd and 53rd Ave instead.",
+    "description": "Northbound Q27 buses will not make stops from 48th Ave/Bell Blvd to 47th Ave/196th St.\n\nSouthbound Q27 buses will not make stops from 47th Ave/193rd St to 48th Ave/Bell Blvd.\n\nNote: Bus arrival information may not be accurate or available while buses are detoured.",
+    "route_ids": [
+      "MTA NYCT_Q27"
+    ],
+    "station_ids": [],
+    "stop_ids": [],
+    "scope": "route",
+    "impact": "unknown",
+    "targets": [
+      {
+        "agency_id": "MTA NYCT",
+        "route_id": "MTA NYCT_Q27",
+        "stop_id": null,
+        "direction_id": null
+      }
+    ],
+    "unmapped_route_ids": [],
+    "unmapped_stop_ids": [],
+    "selectors": [
+      {
+        "agency_id": "MTA NYCT",
+        "route_id": "Q27"
+      }
+    ]
+  },
+  "notes": [
+    "Counts are a point-in-time sample; zero active alerts can be valid."
+  ]
+}

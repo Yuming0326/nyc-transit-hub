@@ -53,6 +53,14 @@ cd frontend
 npm run build
 ```
 
+## Verify subway realtime integration
+
+From backend/, run `python scripts/verify_subway.py --output /tmp/subway-verification.json`
+with network access. It checks all eight arrival feeds, representative/multi-group
+stations and source alert normalization. It returns failure for stale/unavailable
+feeds without relaxing configured freshness. See the [saved report](docs/subway-verification.json)
+and [Y8/Y9 consumer notes](docs/mta-data.md#y8-arrivals-and-y9-alerts-verification--november-25-2026).
+
 ## Enable Firebase (optional)
 1. Create a Firebase project and Cloud Firestore database. Enable Google under Authentication > Sign-in method. Add localhost to authorized domains for development.
 2. Register a web app. Copy its config values into `frontend/.env` using the provided VITE_FIREBASE_* names, then restart Vite.

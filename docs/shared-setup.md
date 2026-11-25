@@ -351,3 +351,14 @@ local verifier cover the retained JSON/manifests, optional schedule databases an
 source inputs. The offline input bundle is local and must be retained/shared by
 Yuming; no credentials or external upload are included. Feature activation and
 hosted verification remain later implementation work; S5/S7 status is unchanged.
+
+## Implementation update: Y8/Y9
+
+Subway arrivals and normalized alerts were reverified against fresh official
+captures on November 25. See the [saved report](subway-verification.json) and
+[consumer guidance](mta-data.md#y8-arrivals-and-y9-alerts-verification--november-25-2026).
+An earlier stale alert snapshot correctly returned 503; a later fresh capture
+passed unchanged thresholds. Internal detailed affected entities are available
+for status/notification work, while the public legacy alert shape is preserved.
+Source selector logic, unknown effects and unscoped notices remain explicit.
+No deployment or S5 browser empty-state verification is claimed.

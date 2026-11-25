@@ -85,13 +85,14 @@ def test_invalid_map_parameters_are_400(map_app, query):
     assert response.status_code == 400 and set(response.json) == {'error'}
 
 
-def test_unknown_route_404_bus_and_demo_are_explicitly_unavailable(map_app):
+def test_unknown_route_404_and_demo_is_explicitly_unavailable(map_app):
     _, client, _, _ = map_app
     assert client.get('/api/map?mode=subway&route_id=missing').status_code == 404
-    assert client.get('/api/map?mode=bus').status_code == 503
+    assert client.get('/api/map?mode=bus&route_id=MTA%20NYCT_X999').status_code == 404
     demo = create_app({'TESTING': True, 'TRANSIT_MODE': 'demo'}).test_client()
-    response = demo.get('/api/map?mode=subway')
-    assert response.status_code == 503 and set(response.json) == {'error'}
+    for mode in ('subway', 'bus'):
+        response = demo.get(f'/api/map?mode={mode}')
+        assert response.status_code == 503 and set(response.json) == {'error'}
 
 
 @pytest.mark.parametrize('failure', ['missing', 'mismatched', 'malformed', 'invalid-coordinate', 'partial'])

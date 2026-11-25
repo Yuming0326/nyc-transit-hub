@@ -4,7 +4,7 @@
   "operations": [
     {
       "operation": "station-detail",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
       "cases": [
         {
@@ -59,7 +59,7 @@
     },
     {
       "operation": "subway-route-search",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -136,7 +136,7 @@
     },
     {
       "operation": "subway-route-detail",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
       "cases": [
         {
@@ -199,7 +199,7 @@
     },
     {
       "operation": "bus-route-search",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -274,7 +274,7 @@
     },
     {
       "operation": "bus-route-detail",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
       "cases": [
         {
@@ -331,7 +331,7 @@
     },
     {
       "operation": "bus-stop-search",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -409,7 +409,7 @@
     },
     {
       "operation": "bus-stop-detail",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "No empty success body; single-entity misses are 404 and mutations return their result.",
       "cases": [
         {
@@ -1589,7 +1589,7 @@
     },
     {
       "operation": "bus-map",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -1870,7 +1870,7 @@
     },
     {
       "operation": "bus-arrivals",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -2021,7 +2021,7 @@
     },
     {
       "operation": "bus-vehicles",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -2103,7 +2103,7 @@
     },
     {
       "operation": "subway-affected-alerts",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {
@@ -2189,7 +2189,7 @@
     },
     {
       "operation": "bus-affected-alerts",
-      "implementation": "prepared",
+      "implementation": "implemented",
       "empty_semantics": "See empty/no_change case; single-entity misses are 404.",
       "cases": [
         {

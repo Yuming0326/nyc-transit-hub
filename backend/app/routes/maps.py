@@ -1,9 +1,9 @@
 import math
 
 from flask import Blueprint, jsonify, request
-from werkzeug.exceptions import BadRequest, ServiceUnavailable
+from werkzeug.exceptions import BadRequest
 
-from ..services.map_service import subway_map
+from ..services.map_service import bus_map, subway_map
 
 bp = Blueprint('maps', __name__)
 
@@ -29,6 +29,4 @@ def map_data():
                 raise ValueError('Invalid bounds')
         except ValueError as error:
             raise BadRequest('bbox must be west,south,east,north with valid increasing bounds.') from error
-    if mode == 'bus':
-        raise ServiceUnavailable('Bus map geometry is not implemented yet.')
-    return jsonify(subway_map(route_id, bbox))
+    return jsonify((bus_map if mode == 'bus' else subway_map)(route_id, bbox))

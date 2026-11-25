@@ -9,4 +9,8 @@ class Config:
     MTA_READ_TIMEOUT_SECONDS = float(os.getenv('MTA_READ_TIMEOUT_SECONDS', '10'))
     MTA_MAX_AGE_SECONDS = float(os.getenv('MTA_MAX_AGE_SECONDS', '120'))
     MTA_ALERTS_MAX_AGE_SECONDS = float(os.getenv('MTA_ALERTS_MAX_AGE_SECONDS', '600'))
+    BUS_MAX_AGE_SECONDS = float(os.getenv('BUS_MAX_AGE_SECONDS', '120'))
+    BUS_VEHICLE_MAX_AGE_SECONDS = float(os.getenv('BUS_VEHICLE_MAX_AGE_SECONDS', '120'))
+    # Backend only; never returned to clients or logged.
+    MTA_BUS_TIME_API_KEY = os.getenv('MTA_BUS_TIME_API_KEY', '')
     FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')

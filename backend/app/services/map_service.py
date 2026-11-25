@@ -1,4 +1,4 @@
-"""Serve imported static subway shapes; never synthesize map geometry."""
+"""Serve imported static subway (Y3) and bus (Y4) shapes; never synthesize map geometry."""
 import json
 import math
 from threading import Lock
@@ -9,20 +9,24 @@ from werkzeug.exceptions import NotFound, ServiceUnavailable
 from .transit_service import DATA_DIR
 
 GEOMETRY_PATH = DATA_DIR / 'generated' / 'geometry.json'
+BUS_GEOMETRY_PATH = DATA_DIR / 'generated' / 'bus' / 'geometry.json'
 UNAVAILABLE = 'Subway map geometry is unavailable. Please retry.'
+BUS_UNAVAILABLE = 'Bus map geometry is unavailable. Please retry.'
 
 
 def init_map(app):
     # Geometry is loaded once on the first map request, not for arrivals requests.
     app.extensions['subway_map'] = {'data': None, 'lock': Lock()}
+    app.extensions['bus_map'] = {'data': None, 'lock': Lock()}
 
 
-def _map_data(catalog):
-    state = current_app.extensions['subway_map']
+def _map_data(catalog, mode='subway'):
+    state = current_app.extensions[f'{mode}_map']
+    path, unavailable = (GEOMETRY_PATH, UNAVAILABLE) if mode == 'subway' else (BUS_GEOMETRY_PATH, BUS_UNAVAILABLE)
     with state['lock']:
         if state['data'] is None:
             try:
-                payload = json.loads(GEOMETRY_PATH.read_text(encoding='utf-8'))
+                payload = json.loads(path.read_text(encoding='utf-8'))
                 if (not isinstance(payload, dict) or not isinstance(payload.get('metadata'), dict)
                         or payload.get('metadata') != catalog.get('metadata')
                         or not payload['metadata'].get('imported_at')
@@ -34,7 +38,7 @@ def _map_data(catalog):
                     properties = feature['properties']
                     coordinates = feature['geometry']['coordinates']
                     if (feature['type'] != 'Feature' or feature['geometry']['type'] != 'LineString'
-                            or properties['mode'] != 'subway' or properties['route_id'] not in routes
+                            or properties['mode'] != mode or properties['route_id'] not in routes
                             or properties['direction_id'] not in ('0', '1', None)
                             or not properties['id'] or len(coordinates) < 2):
                         raise ValueError('Invalid geometry feature')
@@ -47,8 +51,8 @@ def _map_data(catalog):
                     indexed.append((feature, bounds))
                 state['data'] = (indexed, payload['metadata']['imported_at'])
             except (OSError, ValueError, KeyError, TypeError) as error:
-                current_app.logger.warning('Subway map artifact unavailable (%s)', type(error).__name__)
-                raise ServiceUnavailable(UNAVAILABLE) from error
+                current_app.logger.warning('%s map artifact unavailable (%s)', mode.title(), type(error).__name__)
+                raise ServiceUnavailable(unavailable) from error
         return state['data']
 
 
@@ -103,3 +107,31 @@ def subway_map(route_id=None, bbox=None):
     return {'mode': 'subway', 'source': 'mta', 'updated_at': updated_at,
             'geometry': {'type': 'FeatureCollection', 'features': features},
             'stations': stations, 'stops': []}
+
+
+def bus_map(route_id=None, bbox=None):
+    """Y13: bus route geometry and stops from the Y4 import, same rules as subway_map."""
+    if current_app.config['TRANSIT_MODE'] != 'live':
+        raise ServiceUnavailable('Map geometry is unavailable in demo mode.')
+    catalog = current_app.extensions['bus']['client'].catalog
+    routes = {route['id'] for route in catalog.get('routes', [])}
+    if not routes:
+        raise ServiceUnavailable(BUS_UNAVAILABLE)
+    if route_id is not None and route_id not in routes:
+        raise NotFound('Bus route not found.')
+    indexed, updated_at = _map_data(catalog, 'bus')
+    coverage = {feature['properties']['route_id'] for feature, _ in indexed}
+    required = {route_id} if route_id is not None else routes
+    if not required.issubset(coverage):
+        raise ServiceUnavailable(BUS_UNAVAILABLE)
+    features = [feature for feature, bounds in indexed
+                if (route_id is None or feature['properties']['route_id'] == route_id)
+                and (bbox is None or _intersects(feature, bounds, bbox))]
+    member = set(catalog['route_stop_ids'][route_id]) if route_id is not None else None
+    stops = [{key: stop[key] for key in ('id', 'name', 'latitude', 'longitude')} for stop in catalog['stops']
+             if (member is None or stop['id'] in member)
+             and (bbox is None or _point_inside((stop['longitude'], stop['latitude']), bbox))]
+    return {'mode': 'bus', 'source': 'mta', 'updated_at': updated_at,
+            'geometry': {'type': 'FeatureCollection', 'features': features},
+            'stations': [], 'stops': stops}
+

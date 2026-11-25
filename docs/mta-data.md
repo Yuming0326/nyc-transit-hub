@@ -443,3 +443,150 @@ loading/packaging execution remains Y15/B22; no deployment is performed here.
 Y7 full offline replay passed: station/map/bus payloads matched apart from import
 metadata, and all seven compressed schedule hashes/counts/diagnostics matched.
 Inventory/input/local-artifact verification passed; 159 backend tests passed.
+
+## Y8 arrivals and Y9 alerts verification — November 25, 2026
+
+**Complete:** the [saved point-in-time report](subway-verification.json) records
+`2026-11-25T13:49:38.767209+00:00` (08:49 EST). All eight arrival feed groups and
+one alert feed passed decoding/full-snapshot/freshness checks. Twelve station
+responses were verified using real captured feeds through in-process Flask:
+one representative per group, three-group Forest Hills-71 Av (G08), plus special
+7/FS/H mappings at 701/D26/H04. Arrival feeds were about 1–6 seconds old; alerts
+were about 432 seconds old, within the unchanged 120/600-second policies.
+
+Every returned arrival was traced to a source trip/stop event, exact parent
+mapping, route and absolute timestamp. Source directions match imported
+platform N/S values, predictions exclude past events, IDs are unique and
+updated_at is the oldest relevant publisher timestamp. Controlled partial-feed
+failure raises 503 instead of returning partial results or demo data. Last
+reported stop remains only an approximate destination, not a guaranteed terminal.
+Offline tests cover all configured feed URLs, multi-feed aggregation, timestamp
+selection, missing absolute time/departure fallback, deleted/canceled/skipped
+entries and upstream/stale failure behavior.
+
+### Affected entities for Zachary and Zhaorui
+
+Existing `/api/alerts` keeps its original `{source,alerts:[{id,header,description,
+route_ids}]}` response and conservative route filtering. Its empty route_ids
+still combines unscoped and stop-only notices; it is not precise station coverage.
+Plain English `en` now takes precedence over regional English and `en-html`.
+
+`MTAClient.affected_alerts()` is an **internal** catalog-aware method for later
+status/subscription consumers. It validates freshness using the same configured
+cache/session and returns mode/source/updated_at plus enriched alerts. Each
+record adds `station_ids`, raw GTFS `stop_ids`, coarse `scope`, `impact`,
+`unmapped_stop_ids` and full standard-field `selectors`. It is not a newly
+registered public endpoint; `/api/transit/alerts` integration remains Y13.
+
+- A selector's route, stop, direction, agency and trip restrictions are combined
+  with **AND**; separate informed_entity selectors are alternatives (**OR**).
+  Preserve selector rows when matching. The flattened route/station arrays are
+  summaries, not permission to cross-match every route with every station.
+- Parent IDs and directional platform IDs map only through known catalog IDs and
+  explicit parent relationships. Never strip suffixes or infer a station name.
+  Other agency namespaces do not inherit a matching subway stop ID.
+- The observed subway-alert agency is `MTASBWY`, distinct from static GTFS agency
+  `MTA NYCT`. Only an explicit agency-only MTASBWY selector is classified network
+  scope; absent/empty, unsupported or trip-restricted selectors remain unknown.
+  Source direction_id is preserved as 0/1, not converted to a compass direction.
+- Unknown stop IDs remain explicit in unmapped_stop_ids. In this fresh capture,
+  all active affected stops resolved to catalog stations: 12 active alerts,
+  30 affected parent stations, five route-scoped and seven stop-scoped notices.
+- The capture contained no standard effect fields. All 12 active alerts therefore
+  have unknown impact. The normalizer uses explicit recognized effect enums when
+  supplied; it never guesses disruption severity from free text or equates an
+  empty alert list with normal service. B13 must verify any future authoritative
+  status/Mercury mapping. MTA-specific extensions/display ordering are not decoded.
+
+Route-filtered R/A/7/SI responses returned 200; R had a valid empty list, while
+A/7/SI had 1/3/2 notices respectively at that instant. Counts are historical
+observations, not fixed tests or ongoing availability claims.
+
+### Failure evidence and reproduction
+
+Earlier that day the publisher alert timestamp was 04:50 UTC, about 877 seconds
+old at 05:04 UTC. It was rejected with HTTP 503 under the existing 600-second
+policy; inspecting its selectors did not make it valid live data. A later fresh
+capture passed without changing limits. Failed snapshots remain uncached; the
+controlled HTTP-boundary failures also confirmed no demo/empty-success fallback.
+These observations do not identify every possible earlier intermittent failure.
+
+Run from backend/ with network access:
+
+```bash
+.venv/bin/python scripts/verify_subway.py --output /tmp/subway-verification.json --snapshots /tmp/subway-captures
+.venv/bin/python -m pytest -q
+```
+
+The command fetches official feeds once, tests HTTP behavior against captured
+snapshots, and exits nonzero when freshness or validation fails. Optional binary
+captures stay outside Git. Stale alert bytes, when inspectable, are diagnostic
+only; they are never served as a healthy live response. Offline source-selector
+and regression tests passed: **176 backend tests**. This work does not deploy,
+verify browser flows, implement bus alerts or claim notification/status completion.
+
+## Y10 bus arrivals and vehicle positions — November 25, 2026
+
+**Complete:** `backend/app/services/bus_time.py`
+adapts Bus Time SIRI v2 StopMonitoring and VehicleMonitoring to the prepared
+`BusArrival`/`Vehicle` contracts, and `/api/bus/stops/:stop_id/arrivals` plus
+`/api/bus/vehicles` are registered (see the [API contract](api-contract.md#implemented-bus-realtime-y10)).
+Stops and routes are validated against the Y4 catalog before any upstream call,
+so unknown IDs are 404 rather than an empty success. Field mappings: `LineRef` →
+route_id, `PublishedLineName` → route_name (catalog short name if absent),
+`DirectionRef` → direction_id, `DestinationName` → destination,
+`MonitoredCall.ExpectedArrivalTime` → arrival_time (null stays null),
+`VehicleRef` → vehicle_id, `RecordedAtTime` → recorded_at,
+`MonitoredCall.ArrivalProximityText` (v2; v1 `Extensions.Distances.PresentableDistance`) → distance_text, `VehicleLocation` →
+latitude/longitude. Bus Time documents `Bearing` as degrees counter-clockwise from
+East; it is published as `(90 − bearing) mod 360`, clockwise from North.
+
+Offline tests (`tests/test_bus_time.py`, 42 cases) cover contract fields, stable
+IDs, ordering, filters, departed/stale/foreign visits, all-rejected 503, empty
+success, request validation before upstream calls, key-free errors, cache reuse
+and failure eviction, bearing conversion, and the live/demo API envelopes:
+**218 backend tests passed**.
+
+Live evidence ([report](bus-verification.json), 2026-11-25 14:58 UTC): from
+`backend/`, `.venv/bin/python scripts/verify_bus.py --output ../docs/bus-verification.json`
+returned 90 arrivals at 9 stops (sorted, unique IDs, deliveries ~0.1 s old) and
+121 vehicles on 8 routes, all with bearings, positions ≤ 90 s old. Findings from
+the live run: Bus Time 302-redirects `version=2` VehicleMonitoring, so vehicles
+are requested with `version=1` (same fields, plain strings) and redirects stay
+disabled because the request carries the key; v2 StopMonitoring carries distance
+in `ArrivalProximityText`. A sampled B63 bearing (raw 164°) converts to 285°,
+consistent with its westbound path toward Pier 6.
+
+## Y11 bus alerts mapped to catalog entities — November 25, 2026
+
+**Complete:** `BusAlertsClient` fetches
+`camsys/bus-alerts` (GTFS-RT, no key) through `fetch_feed`, so decoding,
+full-snapshot and the 600-second alert freshness rules match subway alerts.
+A validated snapshot is reused for `CACHE_TTL_SECONDS`, rechecked for freshness
+on every use and evicted on failure; failures raise and become 503 at the API.
+
+Mapping rules (exact IDs only, never names or free text):
+
+- Route: `agency_id` + `_` + `route_id` must be a catalog route (`MTA NYCT_B63`,
+  `MTABC_Q53+`). A selector without an agency resolves only because each source
+  route ID appears under exactly one agency in the Y4 catalog. An already
+  qualified ID is accepted as-is. A mismatched agency is unmapped, not corrected.
+- Stop: numeric `stop_id` → `MTA_<id>` when that stop exists in the catalog.
+- Agency-only `MTA NYCT`/`MTABC` selectors are `network` scope (agency-wide);
+  trip/other fields, unknown agencies such as `MTASBWY`, empty selectors or any
+  unmapped reference make the scope `unknown`. Valid alternative selectors in the
+  same alert stay matchable through `targets`.
+- `impact` uses explicit GTFS-RT effects only, as in Y9; absent effects stay unknown.
+
+Offline tests (`tests/test_bus_alerts.py`, 11 cases) cover mapping, agency
+mismatch, unmapped/unsupported selectors, network/route/stop scope, impact,
+active periods, route/stop/route+stop filtering and coverage, cache reuse,
+aged-cache rejection and uncached failures: **229 backend tests passed**.
+
+Live evidence ([report](bus-alerts-verification.json), 2026-11-25): the feed was
+168 s old; 106 active alerts used 875 `agency_id`+`route_id` selectors
+(563 MTA NYCT, 312 MTABC). All 121 referenced routes mapped to the catalog with
+none unmapped; every alert was route scope with unknown impact (no GTFS-RT
+effect supplied). No stop selectors appeared, so stop mapping is covered by
+tests only. Re-run with `.venv/bin/python scripts/verify_bus_alerts.py --output
+../docs/bus-alerts-verification.json`.
