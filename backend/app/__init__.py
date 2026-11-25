@@ -14,9 +14,11 @@ def create_app(test_config=None):
     init_map(app)
     from .services.bus_service import init_bus
     init_bus(app)
+    from .services.schedule_store import ScheduleStore
+    app.extensions['schedules'] = ScheduleStore(app.config.get('SCHEDULE_DIR'))
     CORS(app, resources={r'/api/*': {'origins': app.config['FRONTEND_ORIGIN']}})
-    from .routes import health, stations, arrivals, alerts, favorites, maps, bus, catalog
-    for module in (health, stations, arrivals, alerts, favorites, maps, bus, catalog):
+    from .routes import health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules
+    for module in (health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules):
         app.register_blueprint(module.bp, url_prefix='/api')
 
     @app.errorhandler(HTTPException)

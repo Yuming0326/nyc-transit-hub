@@ -590,3 +590,85 @@ none unmapped; every alert was route scope with unknown impact (no GTFS-RT
 effect supplied). No stop selectors appeared, so stop mapping is covered by
 tests only. Re-run with `.venv/bin/python scripts/verify_bus_alerts.py --output
 ../docs/bus-alerts-verification.json`.
+
+## Y14 active services by service date — November 25, 2026
+
+**Complete:** `backend/app/services/service_calendar.py` resolves which GTFS
+`service_id`s run on a selected service date in one retained per-feed schedule
+database (identity stays `(feed_id, service_id)`).
+
+- A service runs when a `calendar` row covers the date (start/end inclusive) with
+  that weekday set and no `calendar_dates` `exception_type=2` removes it, or when
+  `exception_type=1` adds it. Feeds with only `calendar_dates` work too.
+- `active_services(db, date)` returns a `ServiceDay` with the active IDs, the IDs
+  added or removed by exceptions for that date, and the feed's published period;
+  `to_dict()` gives a JSON-ready form for Y15/Y17.
+- Dates outside the published period raise `ServiceDateOutOfRange`, so missing
+  coverage is never shown as an ordinary day without service. The period is
+  `feed_info` start/end when present (bus calendars start 2026-10-08 but publish
+  from 2026-10-12), otherwise the calendar/exception extent. A day inside the
+  period with no services is a real empty result.
+- Input is a service date (`date`, `YYYY-MM-DD` or `YYYYMMDD`); impossible dates
+  and timestamps raise `ServiceDateError`. Mapping a New York clock time,
+  after-midnight trips and DST onto service days stays with Y16, and loading
+  the gzip artifacts at runtime stays with Y15/B22.
+
+Checked against the retained data: the subway feed runs `Sunday` service on
+Thanksgiving (2026-11-26), Christmas and New Year's Day and `Saturday` service on
+2027-01-18, and regular `Weekday`/`Saturday`/`Sunday` service otherwise; dates
+before 2026-11-01 or after 2027-05-15 are refused. The Manhattan bus feed swaps
+its four weekday depot services for Sunday ones on Thanksgiving and Christmas.
+Its `*-BM` services carry irregular weekday flags plus holiday-eve additions
+(e.g. `OH_D6-Sunday-BM` on 2026-11-25); they are ordinary services on the dates
+the calendar gives, and their past-midnight times are handled by Y16 below.
+`tests/test_service_calendar.py` covers weekday/weekend, exceptions, inclusive
+bounds, empty days, out-of-period, invalid input, an importer round-trip and
+(when generated locally) the real subway Thanksgiving case.
+
+## Y15–Y18 scheduled departures — November 25, 2026
+
+**Complete locally; not deployed.** `GET /api/schedules` now serves scheduled
+departures from the retained GTFS feeds (contract in
+[api-contract.md](api-contract.md#prepared-schedules-and-journeys)).
+
+- **Y15 departures** (`schedule_service.scheduled_departures`): a subway
+  `station_id` covers the parent and its platform stops; a bus `stop_id` is the
+  discovery ID and is searched in every bus feed. Optional `route_id` and
+  `direction_id` filter the trips. Only trips active on the service day (Y14) are
+  used. A trip's last stop and stops with `pickup_type=1` are arrivals, not
+  departures, and untimed stops are skipped rather than interpolated. Results are
+  sorted by real departure time, then a stable `feed:service-date:trip:sequence` ID.
+- **Y16 service day and time** (`service_time.py`): GTFS times count from
+  "noon minus 12 hours" on the service date in New York, converted in UTC so DST
+  is handled correctly. A `25:05:00` trip stays on its service date while its
+  `departure_time` is the next calendar day. On DST change days the spec origin is
+  not local midnight (on 2026-11-01 a `00:30:00` time is 01:30 EDT). For "what
+  leaves between two instants" across midnight, `departures_between` also checks
+  the earlier service days the feed's longest trip can reach.
+- **Y17 kept apart from realtime**: the response is labelled `source:"mta"`,
+  `timing_basis:"schedule"`, and `updated_at` is the schedule import time. It
+  never calls or merges realtime feeds; `/api/arrivals` and bus arrivals remain
+  the prediction endpoints.
+- **Coverage stays explicit**: unknown station/stop/route is 404. A stop or
+  route that is known (in a feed or the bus catalog) but has no scheduled trips,
+  or a date outside a feed's published period, is 503. A covered day with no
+  service at the stop is a 200 with `departures: []`. All 47 discovery routes
+  without schedules return 503. The 109 used GTFS bus stops without discovery IDs
+  still cannot be requested by public ID.
+- **Runtime data**: `schedule_store.py` reads the tracked manifest, checks each
+  gzip artifact's SHA-256, decompresses it once to `<feed>.<sha>.sqlite` beside
+  it (ignored by Git) and opens it read-only. `SCHEDULE_DIR` points it at another
+  directory; `scripts/prepare_schedules.py` prepares every feed ahead of time.
+  All seven feeds prepare in about 3 seconds locally.
+- **Y18 tests**: `test_service_time.py` and `test_schedules.py` build small GTFS
+  feeds through the real importer and cover weekday/weekend, the Thanksgiving
+  swap, empty days, out-of-period dates, overnight trips, both 2026–27 DST changes
+  (including a 26:30 trip that would hit the missing 02:30), filters, 400/404/503
+  cases and the read-only store. Where schedules are generated locally, they also
+  check 23 St (R20) and the B63 at MTA_308214 on real data.
+
+Checked on the retained data: R20 has 1,048 weekday departures on 2026-11-25 and
+656 on Thanksgiving, the same timetable as Sunday 2026-11-29. B63 at MTA_308214
+has 89 weekday and 78 Thanksgiving departures. From 00:00 to 01:00 EST on
+Thanksgiving, R20 returns 15 departures, including 24:xx trips from the
+2026-11-25 service day.

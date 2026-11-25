@@ -139,7 +139,7 @@ Paths below are relative to backend/app/data/.
 | Live subway | generated/catalog.json | Loaded once on app startup |
 | Subway map | catalog.json + stations.json + geometry.json under generated/; matching metadata | Implemented locally; geometry loads lazily against startup catalog |
 | Bus static APIs/map | generated/bus/catalog.json + geometry.json | Imported; API integration remains Y13 |
-| Schedules/planner data | generated/schedules/manifest.json and all seven referenced databases | Retained locally; runtime services remain Y14–Y24 |
+| Schedules/planner data | generated/schedules/manifest.json and all seven referenced databases | `/api/schedules` (Y15–Y17) reads them lazily; planner remains Y19–Y24 |
 | Build verification | generated/data-manifest.json | Tracks JSON/manifest checksums and source pins |
 
 The schedule databases total 224,783,110 bytes compressed and 1,159,970,816 bytes
@@ -155,8 +155,11 @@ Use a versioned directory named by the schedule manifest checksum and promote
 it as a matching set; keep the previous version for rollback. The later runtime
 loader must verify the manifest and use that configured directory. Avoid
 per-request decompression/downloads and choose storage/build capacity for the
-measured sizes. No schedule directory environment variable/loader is implemented
-by Y7; Y15/B22 implement that convention before enabling schedule features.
+measured sizes. Y15 implements the loader: it verifies each artifact against the
+manifest SHA-256, decompresses it once to `<feed>.<sha>.sqlite` in the schedule
+directory (default generated/schedules, or `SCHEDULE_DIR`) and opens it read-only.
+Run `scripts/prepare_schedules.py` in the build so requests never decompress;
+B22 still owns packaging and the hosted path.
 
 Artifacts that affect startup catalogs require a restart/redeploy after promotion.
 Future bus/schedule feature owners must verify their runtime paths and hosted
