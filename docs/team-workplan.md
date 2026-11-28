@@ -144,6 +144,14 @@ Main areas: backend/app/data/, backend/scripts/, static_gtfs.py, mta_client.py, 
 
 ## 6. Zachary: accounts, personalized services, supporting APIs, deployment
 
+**November 28 backend delivery:** typed favorites and legacy compatibility,
+subscriptions, notification evaluation/read state, status and equipment APIs are
+implemented with offline tests and real Firebase verification. Exact scope,
+source timing limitations and evidence are in [personalization handoff](personalization-handoff.md).
+This is ready for integration, not a declaration that every B item is verified
+on deployment. B4 final-browser cases, C13 new saved-item UI, schedule artifacts,
+incremental redeployment and hosted end-to-end checks remain joint follow-up.
+
 ### A. Firebase accounts
 
 | ID | Small task | Depends on | Completion check |

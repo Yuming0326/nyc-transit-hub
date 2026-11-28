@@ -1,0 +1,92 @@
+{
+  "checked_at_utc": "2026-11-28T05:42:17.179456+00:00",
+  "checks": [
+    {
+      "name": "save-subway-station",
+      "passed": true
+    },
+    {
+      "name": "duplicate-subway-station",
+      "passed": true
+    },
+    {
+      "name": "save-subway-route",
+      "passed": true
+    },
+    {
+      "name": "duplicate-subway-route",
+      "passed": true
+    },
+    {
+      "name": "save-bus-stop",
+      "passed": true
+    },
+    {
+      "name": "duplicate-bus-stop",
+      "passed": true
+    },
+    {
+      "name": "save-bus-route",
+      "passed": true
+    },
+    {
+      "name": "duplicate-bus-route",
+      "passed": true
+    },
+    {
+      "name": "favorites-persist-across-app-restart",
+      "passed": true
+    },
+    {
+      "name": "second-user-isolated",
+      "passed": true
+    },
+    {
+      "name": "legacy-projects-v2-station",
+      "passed": true
+    },
+    {
+      "name": "signed-in-browser-direct-firestore-denied",
+      "passed": true
+    },
+    {
+      "name": "v2-delete-visible-in-legacy",
+      "passed": true
+    },
+    {
+      "name": "legacy-create-visible-in-v2",
+      "passed": true
+    },
+    {
+      "name": "subscription-persist",
+      "passed": true
+    },
+    {
+      "name": "concurrent-synthetic-notification-deduplicated",
+      "passed": true
+    },
+    {
+      "name": "notification-other-user-inaccessible",
+      "passed": true
+    },
+    {
+      "name": "read-state-persist",
+      "passed": true
+    },
+    {
+      "name": "dedup-and-read-preserved",
+      "passed": true
+    },
+    {
+      "name": "disabled-no-new-notifications",
+      "passed": true
+    },
+    {
+      "name": "revoked-token-rejected",
+      "passed": true
+    }
+  ],
+  "cleanup": true,
+  "notification_source": "Explicitly synthetic disruption; real Firebase persistence and real signed ID tokens",
+  "passed": true
+}

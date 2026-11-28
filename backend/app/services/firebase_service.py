@@ -19,11 +19,17 @@ def require_user(handler):
     def wrapped(*args, **kwargs):
         header = request.headers.get('Authorization', '')
         if not header.startswith('Bearer ') or not header[7:].strip():
-            raise Unauthorized('Sign in to access favorites.')
+            raise Unauthorized('Sign in to access personalized features.')
         app = firebase_app()
         from firebase_admin import auth
         try:
-            g.user_id = auth.verify_id_token(header[7:], app=app, check_revoked=True)['uid']
+            decoded = auth.verify_id_token(header[7:], app=app, check_revoked=True)
+            uid = decoded.get('uid')
+            if not isinstance(uid, str) or not uid or len(uid) > 128 or '/' in uid:
+                raise ValueError('Invalid user identity')
+            g.user_id = uid
+        except auth.CertificateFetchError as error:
+            raise ServiceUnavailable('Firebase token verification is temporarily unavailable.') from error
         except Exception as error:
             raise Unauthorized('Invalid or expired Firebase token.') from error
         return handler(*args, **kwargs)

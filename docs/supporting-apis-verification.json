@@ -1,0 +1,58 @@
+{
+  "checked_at_utc": "2026-11-28T05:42:30.314333+00:00",
+  "equipment_timestamp_basis": "Official HTTP Date; upstream payload has no publication or per-asset change timestamp",
+  "passed": false,
+  "results": [
+    {
+      "path": "/api/service-status?mode=subway",
+      "http_status": 503,
+      "source": null,
+      "updated_at": null,
+      "count": 0,
+      "status_counts": {},
+      "coverage": null,
+      "cors_origin": "http://localhost:5173",
+      "passed": false,
+      "error": "Live alerts are temporarily unavailable. Please retry."
+    },
+    {
+      "path": "/api/service-status?mode=bus",
+      "http_status": 503,
+      "source": null,
+      "updated_at": null,
+      "count": 0,
+      "status_counts": {},
+      "coverage": null,
+      "cors_origin": "http://localhost:5173",
+      "passed": false,
+      "error": "Live alerts are temporarily unavailable. Please retry."
+    },
+    {
+      "path": "/api/stations/R20/equipment",
+      "http_status": 200,
+      "source": "mta",
+      "updated_at": "2026-11-28T05:42:30+00:00",
+      "count": 7,
+      "status_counts": {
+        "reported_outage": 3,
+        "unknown": 4
+      },
+      "coverage": "partial",
+      "cors_origin": "http://localhost:5173",
+      "passed": true
+    },
+    {
+      "path": "/api/stations/L06/equipment",
+      "http_status": 200,
+      "source": "mta",
+      "updated_at": "2026-11-28T05:42:30+00:00",
+      "count": 2,
+      "status_counts": {
+        "unknown": 2
+      },
+      "coverage": "partial",
+      "cors_origin": "http://localhost:5173",
+      "passed": true
+    }
+  ]
+}

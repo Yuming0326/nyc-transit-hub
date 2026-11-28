@@ -1,0 +1,10 @@
+{
+  "checked_date": "2026-11-28",
+  "passed": false,
+  "official_archive_checks": "All seven downloaded archives matched the reviewed source SHA-256 values.",
+  "rebuild": "Subway and all six bus schedule databases were generated using the existing importer.",
+  "publication": "Stopped before publishing any candidate artifact: rebuilt b.sqlite.gz did not match the reviewed artifact SHA-256.",
+  "tracked_manifest_modified": false,
+  "limitation": "Exact binary rebuild mismatch remains unresolved; a toolchain difference is possible but not established.",
+  "required_handoff": "Obtain the original seven reviewed .sqlite.gz artifacts from the transit owner, then use prepare_schedule_artifacts.py --source-dir and check_data_artifacts.py --schedules. Do not weaken hashes or replace the transit owner's manifest silently."
+}

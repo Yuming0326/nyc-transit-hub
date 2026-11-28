@@ -244,6 +244,10 @@ model are in [Y19–Y24](mta-data.md#y19y24-journey-planning--november-25-2026).
 
 ## Prepared favorites extension and migration
 
+**Implemented in Zachary's backend delivery (November 28).** Paths and response
+fields below are preserved. See [handoff](personalization-handoff.md) for storage,
+transactions, signed cursors, verification and remaining deployed checks.
+
 Preserve `/api/favorites` exactly for existing station-only clients. Add a parallel
 v2 interface; the frontend switches only when its implementation is ready.
 
@@ -274,6 +278,10 @@ after union/deduplication. Tests must cover both API directions and concurrent
 upserts. Existing v0 delete's station validation stays unchanged.
 
 ## Prepared subscriptions and notifications
+
+**Implemented in Zachary's backend delivery (November 28).** Evaluation only
+creates notifications for source-classified disruptions and precisely matching
+enabled subscriptions. Unknown/information effects do not become disruptions.
 
 Subscriptions are independent of favorites: removing a favorite does not disable
 a subscription. One subscription per user/Target; same deterministic ID rule as
@@ -319,6 +327,14 @@ without upstream calls. Disabled subscriptions stop future notices; past records
 and read states remain private and available.
 
 ## Prepared service status and equipment
+
+**Implemented in Zachary's backend delivery (November 28).** Status has no
+authoritative positive-normal source: no matched disruptive evidence yields
+unknown, and retrieval/freshness failures yield 503. Equipment coverage remains
+partial/unknown. Its source JSON has no publication timestamp: updated_at uses
+the older official HTTP response Date, not an equipment change timestamp; this
+cannot independently prove the age of the underlying payload. See the handoff
+for supported joins, limitations and recorded live-source results.
 
 | Method/path | Query | 200 response |
 | --- | --- | --- |
