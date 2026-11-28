@@ -5,6 +5,11 @@ The application runs without Firebase credentials. Demo mode remains the default
 
 ## Start the backend on Windows
 
+Zachary's account/personalization and status/equipment APIs are implemented in this
+delivery. See [backend handoff](docs/personalization-handoff.md) for exact endpoints,
+real Firebase verification, source limitations, schedule-artifact deployment, and
+the remaining joint frontend/hosted checks. No frontend implementation is included.
+
 Current integration evidence and remaining checks are recorded in [shared setup](docs/shared-setup.md) and [deployment](docs/deployment.md). The opt-in online check is `python scripts/check_live_api.py` from `backend/`. Earlier handoffs and smoke-test evidence are preserved in the [documentation archive](docs/archive/2026-10/README.md).
 
 On Windows PowerShell, from `backend/`:

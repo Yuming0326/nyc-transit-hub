@@ -20,8 +20,8 @@ def create_app(test_config=None):
     app.extensions['journeys'] = JourneyPlanner(app.extensions['schedules'],
                                                 cross_mode=app.config.get('JOURNEY_CROSS_MODE_WALKS', True))
     CORS(app, resources={r'/api/*': {'origins': app.config['FRONTEND_ORIGIN']}})
-    from .routes import health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys
-    for module in (health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys):
+    from .routes import health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys, personalization, supporting_services
+    for module in (health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys, personalization, supporting_services):
         app.register_blueprint(module.bp, url_prefix='/api')
 
     @app.errorhandler(HTTPException)

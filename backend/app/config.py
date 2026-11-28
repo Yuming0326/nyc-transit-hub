@@ -16,3 +16,5 @@ class Config:
     # Backend only; never returned to clients or logged.
     MTA_BUS_TIME_API_KEY = os.getenv('MTA_BUS_TIME_API_KEY', '')
     FIREBASE_PROJECT_ID = os.getenv('FIREBASE_PROJECT_ID')
+    EQUIPMENT_MAX_AGE_SECONDS = float(os.getenv('EQUIPMENT_MAX_AGE_SECONDS', '600'))
+    PAGINATION_SIGNING_KEY = os.getenv('PAGINATION_SIGNING_KEY', '')
