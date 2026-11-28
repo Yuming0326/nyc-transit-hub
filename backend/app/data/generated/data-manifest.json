@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "json_checksum_format": "UTF-8 with line endings normalized to LF; other formatting retained",
+  "files": {
+    "catalog.json": {
+      "sha256": "e789d2919a6b6d8348b42b84cb65503ad337b0876dc383b69d72eacc4774d5c1",
+      "bytes": 249987
+    },
+    "stations.json": {
+      "sha256": "d98d786d1f2c170ffc0fd4d345201ff2ae1d3f819117e85d421b8cdede6f98f6",
+      "bytes": 76001
+    },
+    "geometry.json": {
+      "sha256": "7368c808d79c861e66526b2bdd5df5b8db07cd70e4df1042d62427b70a94c6f8",
+      "bytes": 3557946
+    },
+    "bus/catalog.json": {
+      "sha256": "bedf0d8875818373fbed6bd41b3ee2c9e423ad37a2791711c5dc3629700c7cf4",
+      "bytes": 6272349
+    },
+    "bus/geometry.json": {
+      "sha256": "83972968eab970df331e82685d20db0cf8ffa01a747ca7fb2cc435a56bc4ab96",
+      "bytes": 9742230
+    },
+    "schedules/manifest.json": {
+      "sha256": "137ba1e1f74891c48fc5569b19de6730c3bcec88bf79586c3235baea949fcbbc",
+      "bytes": 37843
+    }
+  },
+  "subway_import": {
+    "source_url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_subway.zip",
+    "imported_at": "2026-11-24T21:13:32.791286+00:00",
+    "sha256": "acb122715bd90aeacf61f4559722ccf0b7de9c63317200a6dd7480246488f1e6",
+    "input_file": "nyc-transit-hub-y1-20261124-subway.zip"
+  },
+  "bus_import": {
+    "source_url": "https://bustime.mta.info/api/where/",
+    "imported_at": "2026-11-24T21:28:56.741459+00:00",
+    "snapshot_sha256": "b1a92a42f89e83f72c8211f3d57a031bbb80d983c859b86628242073535a4512",
+    "input_file": "nyc-transit-y4-snapshot.json",
+    "fetch_started_at": "2026-11-24T21:26:04.520226+00:00",
+    "fetched_at": "2026-11-24T21:26:13.193263+00:00",
+    "source_response_time_range": [
+      "2026-11-24T21:26:04.640000+00:00",
+      "2026-11-24T21:26:13.171000+00:00"
+    ],
+    "source_response_count": 396,
+    "scope": "All routes returned by agencies-with-coverage and routes-for-agency; not all MTA modes."
+  },
+  "schedule_imported_at": "2026-11-25T04:02:13.603062+00:00"
+}

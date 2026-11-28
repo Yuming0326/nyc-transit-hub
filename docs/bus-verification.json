@@ -1,0 +1,436 @@
+{
+  "task": "Y10",
+  "source": "MTA Bus Time SIRI v2 via /api/bus endpoints (live mode)",
+  "started_at": "2026-11-25T14:58:19.609514+00:00",
+  "finished_at": "2026-11-25T14:58:55.993024+00:00",
+  "catalog_imported_at": "2026-11-24T21:28:56.741459+00:00",
+  "passed": true,
+  "vehicles": [
+    {
+      "route_id": "MTA NYCT_B63",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 13,
+      "directions": {
+        "0": 7,
+        "1": 6
+      },
+      "with_bearing": 13,
+      "with_destination": 13,
+      "oldest_position_age_seconds": 31.8,
+      "sample": {
+        "bearing": 284.86,
+        "destination": "PIER 6 BKLYN BRIDGE PARK via 5 AV",
+        "direction_id": "0",
+        "id": "MTA NYCT_367",
+        "latitude": 40.691284,
+        "longitude": -73.998221,
+        "recorded_at": "2026-11-25T14:58:07+00:00",
+        "route_id": "MTA NYCT_B63"
+      }
+    },
+    {
+      "route_id": "MTA NYCT_M15",
+      "status": 200,
+      "updated_age_seconds": 0.2,
+      "vehicles": 22,
+      "directions": {
+        "0": 11,
+        "1": 11
+      },
+      "with_bearing": 22,
+      "with_destination": 22,
+      "oldest_position_age_seconds": 26.3,
+      "sample": {
+        "bearing": 36.42,
+        "destination": "EAST HARLEM 125 ST via 1 AV",
+        "direction_id": "0",
+        "id": "MTA NYCT_5256",
+        "latitude": 40.725992,
+        "longitude": -73.986472,
+        "recorded_at": "2026-11-25T14:58:16+00:00",
+        "route_id": "MTA NYCT_M15"
+      }
+    },
+    {
+      "route_id": "MTA NYCT_M15+",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 28,
+      "directions": {
+        "1": 17,
+        "0": 11
+      },
+      "with_bearing": 28,
+      "with_destination": 28,
+      "oldest_position_age_seconds": 30.6,
+      "sample": {
+        "bearing": 207.5,
+        "destination": "SELECT BUS SERVICE SOUTH FERRY via 2 AV",
+        "direction_id": "1",
+        "id": "MTA NYCT_6094",
+        "latitude": 40.719476,
+        "longitude": -73.990374,
+        "recorded_at": "2026-11-25T14:58:09+00:00",
+        "route_id": "MTA NYCT_M15+"
+      }
+    },
+    {
+      "route_id": "MTA NYCT_BX12",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 7,
+      "directions": {
+        "1": 4,
+        "0": 3
+      },
+      "with_bearing": 7,
+      "with_destination": 7,
+      "oldest_position_age_seconds": 23.9,
+      "sample": {
+        "bearing": 260.96,
+        "destination": "SEDWICK AV via PELHAM PKY via FORDHAM RD",
+        "direction_id": "1",
+        "id": "MTA NYCT_1208",
+        "latitude": 40.862808,
+        "longitude": -73.908327,
+        "recorded_at": "2026-11-25T14:58:26+00:00",
+        "route_id": "MTA NYCT_BX12"
+      }
+    },
+    {
+      "route_id": "MTA NYCT_Q58",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 14,
+      "directions": {
+        "0": 8,
+        "1": 6
+      },
+      "with_bearing": 14,
+      "with_destination": 14,
+      "oldest_position_age_seconds": 26.3,
+      "sample": {
+        "bearing": 64.41,
+        "destination": "FLUSHING via CORONA AV",
+        "direction_id": "0",
+        "id": "MTA NYCT_4670",
+        "latitude": 40.730825,
+        "longitude": -73.885823,
+        "recorded_at": "2026-11-25T14:58:13.339000+00:00",
+        "route_id": "MTA NYCT_Q58"
+      }
+    },
+    {
+      "route_id": "MTA NYCT_S79+",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 16,
+      "directions": {
+        "1": 7,
+        "0": 9
+      },
+      "with_bearing": 16,
+      "with_destination": 16,
+      "oldest_position_age_seconds": 26.4,
+      "sample": {
+        "bearing": 222.44,
+        "destination": "SELECT BUS SI MALL via HYLAN",
+        "direction_id": "1",
+        "id": "MTA NYCT_8277",
+        "latitude": 40.588231,
+        "longitude": -74.090581,
+        "recorded_at": "2026-11-25T14:58:24+00:00",
+        "route_id": "MTA NYCT_S79+"
+      }
+    },
+    {
+      "route_id": "MTABC_Q53+",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "vehicles": 18,
+      "directions": {
+        "0": 10,
+        "1": 8
+      },
+      "with_bearing": 18,
+      "with_destination": 18,
+      "oldest_position_age_seconds": 48.7,
+      "sample": {
+        "bearing": 202.68,
+        "destination": "+SELECT BUS WOODSIDE",
+        "direction_id": "0",
+        "id": "MTABC_6074",
+        "latitude": 40.74635,
+        "longitude": -73.903053,
+        "recorded_at": "2026-11-25T14:58:32.604000+00:00",
+        "route_id": "MTABC_Q53+"
+      }
+    },
+    {
+      "route_id": "MTABC_BM1",
+      "status": 200,
+      "updated_age_seconds": 0.0,
+      "vehicles": 3,
+      "directions": {
+        "1": 3
+      },
+      "with_bearing": 3,
+      "with_destination": 3,
+      "oldest_position_age_seconds": 89.9,
+      "sample": {
+        "bearing": 332.71,
+        "destination": "MIDTOWN - 57 ST via CHURCH ST - via MADISON AV",
+        "direction_id": "1",
+        "id": "MTABC_1384",
+        "latitude": 40.686458,
+        "longitude": -74.008697,
+        "recorded_at": "2026-11-25T14:57:22+00:00",
+        "route_id": "MTABC_BM1"
+      }
+    }
+  ],
+  "arrivals": [
+    {
+      "stop_id": "MTA_308214",
+      "route_checked": "MTA NYCT_B63",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "arrivals": 7,
+      "timed": 4,
+      "untimed_with_distance": 3,
+      "routes": [
+        "MTA NYCT_B63"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 8.3,
+      "sample": {
+        "arrival_time": "2026-11-25T15:06:38.190000+00:00",
+        "destination": "BAY RIDGE SHORE RD via 5 AV",
+        "direction_id": "1",
+        "distance_text": "0.7 miles away",
+        "id": "dce83fa429eec0ef3bf03811c306c63c0df4b418545007119040c494a7e9ba4c",
+        "recorded_at": "2026-11-25T14:58:01+00:00",
+        "route_id": "MTA NYCT_B63",
+        "route_name": "B63",
+        "vehicle_id": "MTA NYCT_381"
+      }
+    },
+    {
+      "stop_id": "MTA_305452",
+      "route_checked": "MTA NYCT_B63",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "arrivals": 9,
+      "timed": 5,
+      "untimed_with_distance": 4,
+      "routes": [
+        "MTA NYCT_B63"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 13.0,
+      "sample": {
+        "arrival_time": "2026-11-25T15:11:25.664000+00:00",
+        "destination": "BAY RIDGE SHORE RD via 5 AV",
+        "direction_id": "1",
+        "distance_text": "1.2 miles away",
+        "id": "37cc90998e9b3db7caef2fed260ea3e7f7a2de1051f8abe33bad81de29ad5573",
+        "recorded_at": "2026-11-25T14:57:59+00:00",
+        "route_id": "MTA NYCT_B63",
+        "route_name": "B63",
+        "vehicle_id": "MTA NYCT_760"
+      }
+    },
+    {
+      "stop_id": "MTA_401782",
+      "route_checked": "MTA NYCT_M15",
+      "status": 200,
+      "updated_age_seconds": 0.2,
+      "arrivals": 14,
+      "timed": 8,
+      "untimed_with_distance": 6,
+      "routes": [
+        "MTA NYCT_M15"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 0.6,
+      "sample": {
+        "arrival_time": "2026-11-25T14:59:06.321000+00:00",
+        "destination": "SOUTH FERRY via 2 AV",
+        "direction_id": "1",
+        "distance_text": "< 1 stop away",
+        "id": "8f8f2fe226e1ab7ef820af00bd8c3cf50d19adbb0a2ec6ac99cc3f47054445a7",
+        "recorded_at": "2026-11-25T14:58:10+00:00",
+        "route_id": "MTA NYCT_M15",
+        "route_name": "M15",
+        "vehicle_id": "MTA NYCT_5782"
+      }
+    },
+    {
+      "stop_id": "MTA_405319",
+      "route_checked": "MTA NYCT_M15+",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "arrivals": 15,
+      "timed": 8,
+      "untimed_with_distance": 7,
+      "routes": [
+        "MTA NYCT_M15+"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 5.3,
+      "sample": {
+        "arrival_time": "2026-11-25T15:03:51.213000+00:00",
+        "destination": "SELECT BUS SERVICE 125 ST via 1 AV",
+        "direction_id": "0",
+        "distance_text": "0.6 miles away",
+        "id": "163fa44c2bf3002b114627423a9dd78f04fee54364cdf61118f660f4014eaa98",
+        "recorded_at": "2026-11-25T14:58:03.571000+00:00",
+        "route_id": "MTA NYCT_M15+",
+        "route_name": "M15-SBS",
+        "vehicle_id": "MTA NYCT_6197"
+      }
+    },
+    {
+      "stop_id": "MTA_103588",
+      "route_checked": "MTA NYCT_BX12",
+      "status": 200,
+      "updated_age_seconds": 0.0,
+      "arrivals": 6,
+      "timed": 4,
+      "untimed_with_distance": 2,
+      "routes": [
+        "MTA NYCT_BX12"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 12.5,
+      "sample": {
+        "arrival_time": "2026-11-25T15:11:06.224000+00:00",
+        "destination": "PELHAM BAY",
+        "direction_id": "0",
+        "distance_text": "2.3 miles away",
+        "id": "ee045092bbe2672afd6d1cc9581e1cf97b5b955a9332863c97684005380e20a5",
+        "recorded_at": "2026-11-25T14:58:14.717000+00:00",
+        "route_id": "MTA NYCT_BX12",
+        "route_name": "Bx12",
+        "vehicle_id": "MTA NYCT_6362"
+      }
+    },
+    {
+      "stop_id": "MTA_503519",
+      "route_checked": "MTA NYCT_Q58",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "arrivals": 7,
+      "timed": 6,
+      "untimed_with_distance": 1,
+      "routes": [
+        "MTA NYCT_Q58"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 22.9,
+      "sample": {
+        "arrival_time": "2026-11-25T15:21:36.716000+00:00",
+        "destination": "RIDGEWOOD TERMINAL via CORONA AV",
+        "direction_id": "1",
+        "distance_text": "3.9 miles away",
+        "id": "9edc229aa0627942ab555ece7f96b5a66edf39f0095f5715bcc7b41c1c161854",
+        "recorded_at": "2026-11-25T14:58:13.094000+00:00",
+        "route_id": "MTA NYCT_Q58",
+        "route_name": "Q58",
+        "vehicle_id": "MTA NYCT_8757"
+      }
+    },
+    {
+      "stop_id": "MTA_201132",
+      "route_checked": "MTA NYCT_S79+",
+      "status": 200,
+      "updated_age_seconds": 0.2,
+      "arrivals": 19,
+      "timed": 16,
+      "untimed_with_distance": 3,
+      "routes": [
+        "MTA NYCT_S78",
+        "MTA NYCT_S79+",
+        "MTA NYCT_SIM1C"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 0.3,
+      "sample": {
+        "arrival_time": "2026-11-25T14:59:04.853000+00:00",
+        "destination": "BRICKTOWN MALL via HYLAN",
+        "direction_id": "1",
+        "distance_text": "1 stop away",
+        "id": "fbe2670dc0ea07838800e866711f039d70c73bda98cf7d5fceba3711afac6e0e",
+        "recorded_at": "2026-11-25T14:58:38+00:00",
+        "route_id": "MTA NYCT_S78",
+        "route_name": "S78",
+        "vehicle_id": "MTA NYCT_8129"
+      }
+    },
+    {
+      "stop_id": "MTA_553332",
+      "route_checked": "MTABC_Q53+",
+      "status": 200,
+      "updated_age_seconds": 0.1,
+      "arrivals": 8,
+      "timed": 8,
+      "untimed_with_distance": 0,
+      "routes": [
+        "MTABC_Q53+",
+        "MTABC_Q70+"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 10.2,
+      "sample": {
+        "arrival_time": "2026-11-25T15:09:00+00:00",
+        "destination": "LAGUARDIA LINK FARE FREE TERMINALS B-C",
+        "direction_id": "0",
+        "distance_text": "approaching",
+        "id": "33dee4a7bf3d5d582937a19dd5d3f1682c8ea707b8d880153c7b95b5fe88c341",
+        "recorded_at": "2026-11-25T14:58:38+00:00",
+        "route_id": "MTABC_Q70+",
+        "route_name": "Q70-SBS",
+        "vehicle_id": "MTABC_6280"
+      }
+    },
+    {
+      "stop_id": "MTA_350091",
+      "route_checked": "MTABC_BM1",
+      "status": 200,
+      "updated_age_seconds": 0.0,
+      "arrivals": 5,
+      "timed": 3,
+      "untimed_with_distance": 2,
+      "routes": [
+        "MTABC_B100"
+      ],
+      "sorted_ok": true,
+      "unique_ids": true,
+      "next_eta_minutes": 5.8,
+      "sample": {
+        "arrival_time": "2026-11-25T15:04:42.914000+00:00",
+        "destination": "MILL BASIN E. 66 ST",
+        "direction_id": "0",
+        "distance_text": "0.9 miles away",
+        "id": "5515d68c4b24730e4cacf477bd63f4b75fc9e88dc5714ae6554c87831b34d76a",
+        "recorded_at": "2026-11-25T14:58:27+00:00",
+        "route_id": "MTABC_B100",
+        "route_name": "B100",
+        "vehicle_id": "MTABC_512"
+      }
+    }
+  ],
+  "notes": [
+    "Counts are a point-in-time sample; an empty list at night can be valid.",
+    "Bearing is converted from Bus Time counter-clockwise-from-East to clockwise-from-North."
+  ]
+}

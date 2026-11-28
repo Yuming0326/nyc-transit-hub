@@ -105,8 +105,12 @@ def normalize_arrivals(feeds, station_id, catalog, *, now=None):
 
 def translated_text(value):
     texts = value.translation
-    return next((t.text for t in texts if t.language.lower().split('-')[0] == 'en'),
-                texts[0].text if texts else '')
+    # en-html is markup, not a regional English plain-text translation.
+    plain=[t for t in texts if t.language.lower() != 'en-html']
+    return next((t.text for t in plain if t.language.lower() == 'en'),
+                next((t.text for t in plain if t.language.lower().startswith('en-')),
+                     next((t.text for t in texts if t.language.lower() == 'en-html'),
+                          texts[0].text if texts else '')))
 
 
 def normalize_alerts(feed, route_id=None, *, now=None):
@@ -154,3 +158,9 @@ class MTAClient:
         feed = fetch_feed(ALERTS_URL, timeout=self.timeout, max_age=self.alerts_max_age,
                           session=self.session)
         return normalize_alerts(feed, route_id)
+
+    def affected_alerts(self):
+        from .subway_alerts import normalize_affected_alerts
+        feed = fetch_feed(ALERTS_URL, timeout=self.timeout, max_age=self.alerts_max_age,
+                          session=self.session)
+        return normalize_affected_alerts(feed, self.catalog)

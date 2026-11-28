@@ -1,0 +1,126 @@
+{
+  "synthetic": true,
+  "description": "Apply referenced responses in order to the frontend mock API. Expected behaviors are UI acceptance targets, not claims of browser verification. Never send fixture mutations to a real backend.",
+  "scenarios": [
+    {
+      "id": "station-refresh-recovery",
+      "steps": [
+        {
+          "operation": "subway-arrivals",
+          "case": "success",
+          "expected": "Display initial arrivals."
+        },
+        {
+          "operation": "subway-arrivals",
+          "case": "empty",
+          "expected": "Clear previous arrivals and display the empty message."
+        },
+        {
+          "operation": "subway-arrivals",
+          "case": "error_503",
+          "expected": "Show a failure, not a healthy empty response."
+        },
+        {
+          "operation": "subway-arrivals",
+          "case": "success",
+          "expected": "Recover and clear the error."
+        }
+      ]
+    },
+    {
+      "id": "bus-eta-states",
+      "steps": [
+        {
+          "operation": "bus-arrivals",
+          "case": "success",
+          "expected": "Show timed arrival."
+        },
+        {
+          "operation": "bus-arrivals",
+          "case": "untimed_distance",
+          "expected": "Show source distance without fabricating ETA."
+        },
+        {
+          "operation": "bus-arrivals",
+          "case": "untimed_no_distance",
+          "expected": "Show arrival estimate unavailable."
+        },
+        {
+          "operation": "bus-arrivals",
+          "case": "stale_feed_unavailable",
+          "expected": "Show error; retain prior same-stop data and original timestamp."
+        },
+        {
+          "operation": "bus-arrivals",
+          "case": "empty",
+          "expected": "Clear retained visits after successful empty response."
+        }
+      ]
+    },
+    {
+      "id": "schedule-service-day-and-coverage",
+      "steps": [
+        {
+          "operation": "bus-schedule",
+          "case": "overnight",
+          "expected": "Retain service date while displaying next-day departure."
+        },
+        {
+          "operation": "bus-schedule",
+          "case": "calendar_exception_empty",
+          "expected": "Show valid no departures."
+        },
+        {
+          "operation": "bus-schedule",
+          "case": "schedule_coverage_unavailable",
+          "expected": "Show schedule unavailable, not no departures."
+        }
+      ]
+    },
+    {
+      "id": "journey-result-states",
+      "steps": [
+        {
+          "operation": "journey-plan",
+          "case": "success",
+          "expected": "Show illustrative journey legs."
+        },
+        {
+          "operation": "journey-plan",
+          "case": "same_endpoint",
+          "expected": "Show zero-duration journey."
+        },
+        {
+          "operation": "journey-plan",
+          "case": "no_path",
+          "expected": "Show valid no-service/no-path result."
+        },
+        {
+          "operation": "journey-plan",
+          "case": "transfer_coverage_unavailable",
+          "expected": "Show unavailable transfer coverage rather than no-path."
+        }
+      ]
+    },
+    {
+      "id": "map-empty-versus-failure",
+      "steps": [
+        {
+          "operation": "subway-map",
+          "case": "success",
+          "expected": "Draw real imported shape coordinates using longitude/latitude."
+        },
+        {
+          "operation": "subway-map",
+          "case": "empty",
+          "expected": "Show no matching features."
+        },
+        {
+          "operation": "subway-map",
+          "case": "error_503",
+          "expected": "Show geometry unavailable, not an empty healthy map."
+        }
+      ]
+    }
+  ]
+}

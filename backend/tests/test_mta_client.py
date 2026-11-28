@@ -24,6 +24,7 @@ def catalog():
     data = BytesIO()
     with ZipFile(data, 'w') as archive:
         archive.writestr('stops.txt', 'stop_id,stop_name,stop_lat,stop_lon,location_type,parent_station\nR20,Union Sq,40.7,-73.9,1,\nR20N,Union Sq,40.7,-73.9,0,R20\nR20S,Union Sq,40.7,-73.9,0,R20\nR01N,Astoria,40.8,-73.8,0,R01\nR01,Astoria,40.8,-73.8,1,\n')
+        archive.writestr('routes.txt', 'route_id\nN\n')
         archive.writestr('trips.txt', 'route_id,trip_id\nN,static-trip\n')
         archive.writestr('stop_times.txt', 'trip_id,stop_id\nstatic-trip,R20N\nstatic-trip,R01N\n')
     return build_catalog(data.getvalue())

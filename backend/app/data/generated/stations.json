@@ -2283,8 +2283,7 @@
     "id": "A61",
     "name": "Rockaway Blvd",
     "routes": [
-      "A",
-      "H"
+      "A"
     ],
     "latitude": 40.680429,
     "longitude": -73.843853
@@ -3229,7 +3228,7 @@
   },
   {
     "id": "G05",
-    "name": "Jamaica Center-Parsons/Archer",
+    "name": "Jamaica Center-York College",
     "routes": [
       "E",
       "J",
@@ -3528,8 +3527,7 @@
     "id": "H01",
     "name": "Aqueduct Racetrack",
     "routes": [
-      "A",
-      "H"
+      "A"
     ],
     "latitude": 40.672097,
     "longitude": -73.835919
@@ -3538,8 +3536,7 @@
     "id": "H02",
     "name": "Aqueduct-N Conduit Av",
     "routes": [
-      "A",
-      "H"
+      "A"
     ],
     "latitude": 40.668234,
     "longitude": -73.834058
@@ -3548,8 +3545,7 @@
     "id": "H03",
     "name": "Howard Beach-JFK Airport",
     "routes": [
-      "A",
-      "H"
+      "A"
     ],
     "latitude": 40.660476,
     "longitude": -73.830301

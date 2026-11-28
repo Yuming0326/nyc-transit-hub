@@ -11,3 +11,11 @@ Flask routes validate HTTP input; services own business logic. Transit responses
 Firebase Auth runs in React. React sends an ID token in Authorization: Bearer. Flask verifies the token (including revocation), derives uid, and accesses only that user's Firestore favorites. Frontend SDK does not access Firestore directly; rules deny client database access. The Admin SDK bypasses these rules, so route authorization is required.
 
 Persistent schema: users/{uid}/favorites/{station_id} with station_id:string. Future preferences can live in a dedicated user document. Use station IDs consistently across frontend, API, and data imports.
+
+The live subway map endpoint (`GET /api/map?mode=subway`) reads static GeoJSON
+from generated/geometry.json lazily on first use, separately from the arrivals
+catalog. It checks that artifact provenance matches the catalog loaded at app
+startup. Route and bounding-box filters return complete intersecting lines and
+matching parent-station points; no live feed fetch occurs. Missing coverage,
+corrupt/mismatched artifacts, demo mode and unimplemented bus geometry return
+503. Route geometry describes retained static trip variants, not current service.

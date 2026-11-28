@@ -10,9 +10,18 @@ def create_app(test_config=None):
         app.config.update(test_config)
     from .services.transit_service import init_transit
     init_transit(app)
+    from .services.map_service import init_map
+    init_map(app)
+    from .services.bus_service import init_bus
+    init_bus(app)
+    from .services.schedule_store import ScheduleStore
+    app.extensions['schedules'] = ScheduleStore(app.config.get('SCHEDULE_DIR'))
+    from .services.journey_planner import JourneyPlanner
+    app.extensions['journeys'] = JourneyPlanner(app.extensions['schedules'],
+                                                cross_mode=app.config.get('JOURNEY_CROSS_MODE_WALKS', True))
     CORS(app, resources={r'/api/*': {'origins': app.config['FRONTEND_ORIGIN']}})
-    from .routes import health, stations, arrivals, alerts, favorites
-    for module in (health, stations, arrivals, alerts, favorites):
+    from .routes import health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys
+    for module in (health, stations, arrivals, alerts, favorites, maps, bus, catalog, schedules, journeys):
         app.register_blueprint(module.bp, url_prefix='/api')
 
     @app.errorhandler(HTTPException)

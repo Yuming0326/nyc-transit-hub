@@ -2284,8 +2284,7 @@
       "id": "A61",
       "name": "Rockaway Blvd",
       "routes": [
-        "A",
-        "H"
+        "A"
       ],
       "latitude": 40.680429,
       "longitude": -73.843853
@@ -3230,7 +3229,7 @@
     },
     {
       "id": "G05",
-      "name": "Jamaica Center-Parsons/Archer",
+      "name": "Jamaica Center-York College",
       "routes": [
         "E",
         "J",
@@ -3529,8 +3528,7 @@
       "id": "H01",
       "name": "Aqueduct Racetrack",
       "routes": [
-        "A",
-        "H"
+        "A"
       ],
       "latitude": 40.672097,
       "longitude": -73.835919
@@ -3539,8 +3537,7 @@
       "id": "H02",
       "name": "Aqueduct-N Conduit Av",
       "routes": [
-        "A",
-        "H"
+        "A"
       ],
       "latitude": 40.668234,
       "longitude": -73.834058
@@ -3549,8 +3546,7 @@
       "id": "H03",
       "name": "Howard Beach-JFK Airport",
       "routes": [
-        "A",
-        "H"
+        "A"
       ],
       "latitude": 40.660476,
       "longitude": -73.830301
@@ -9785,17 +9781,17 @@
     },
     "G05": {
       "station_id": "G05",
-      "name": "Jamaica Center-Parsons/Archer",
+      "name": "Jamaica Center-York College",
       "direction": "Unknown"
     },
     "G05N": {
       "station_id": "G05",
-      "name": "Jamaica Center-Parsons/Archer",
+      "name": "Jamaica Center-York College",
       "direction": "Northbound"
     },
     "G05S": {
       "station_id": "G05",
-      "name": "Jamaica Center-Parsons/Archer",
+      "name": "Jamaica Center-York College",
       "direction": "Southbound"
     },
     "G06": {
@@ -12439,10 +12435,157 @@
       "direction": "Southbound"
     }
   },
+  "routes": [
+    {
+      "id": "1",
+      "name": "Broadway - 7 Avenue Local",
+      "short_name": "1"
+    },
+    {
+      "id": "2",
+      "name": "7 Avenue Express",
+      "short_name": "2"
+    },
+    {
+      "id": "3",
+      "name": "7 Avenue Express",
+      "short_name": "3"
+    },
+    {
+      "id": "4",
+      "name": "Lexington Avenue Express",
+      "short_name": "4"
+    },
+    {
+      "id": "5",
+      "name": "Lexington Avenue Express",
+      "short_name": "5"
+    },
+    {
+      "id": "6",
+      "name": "Lexington Avenue Local",
+      "short_name": "6"
+    },
+    {
+      "id": "6X",
+      "name": "Pelham Bay Park Express",
+      "short_name": "6X"
+    },
+    {
+      "id": "7",
+      "name": "Flushing Local",
+      "short_name": "7"
+    },
+    {
+      "id": "7X",
+      "name": "Flushing Express",
+      "short_name": "7X"
+    },
+    {
+      "id": "A",
+      "name": "8 Avenue Express",
+      "short_name": "A"
+    },
+    {
+      "id": "B",
+      "name": "6 Avenue Express",
+      "short_name": "B"
+    },
+    {
+      "id": "C",
+      "name": "8 Avenue Local",
+      "short_name": "C"
+    },
+    {
+      "id": "D",
+      "name": "6 Avenue Express",
+      "short_name": "D"
+    },
+    {
+      "id": "E",
+      "name": "8 Avenue Local",
+      "short_name": "E"
+    },
+    {
+      "id": "F",
+      "name": "Queens Blvd Express/6 Av Local",
+      "short_name": "F"
+    },
+    {
+      "id": "FS",
+      "name": "Franklin Avenue Shuttle",
+      "short_name": "S"
+    },
+    {
+      "id": "FX",
+      "name": "Brooklyn F Express",
+      "short_name": "FX"
+    },
+    {
+      "id": "G",
+      "name": "Brooklyn-Queens Crosstown",
+      "short_name": "G"
+    },
+    {
+      "id": "GS",
+      "name": "42 St Shuttle",
+      "short_name": "S"
+    },
+    {
+      "id": "H",
+      "name": "Rockaway Park Shuttle",
+      "short_name": "S"
+    },
+    {
+      "id": "J",
+      "name": "Nassau St Local",
+      "short_name": "J"
+    },
+    {
+      "id": "L",
+      "name": "14 St-Canarsie Local",
+      "short_name": "L"
+    },
+    {
+      "id": "M",
+      "name": "Queens Blvd Local/6 Av Local",
+      "short_name": "M"
+    },
+    {
+      "id": "N",
+      "name": "Broadway Local",
+      "short_name": "N"
+    },
+    {
+      "id": "Q",
+      "name": "Broadway Express",
+      "short_name": "Q"
+    },
+    {
+      "id": "R",
+      "name": "Broadway Local",
+      "short_name": "R"
+    },
+    {
+      "id": "SI",
+      "name": "Staten Island Railway",
+      "short_name": "SIR"
+    },
+    {
+      "id": "W",
+      "name": "Broadway Local",
+      "short_name": "W"
+    },
+    {
+      "id": "Z",
+      "name": "Nassau St Express",
+      "short_name": "Z"
+    }
+  ],
   "metadata": {
     "source_url": "https://rrgtfsfeeds.s3.amazonaws.com/gtfs_subway.zip",
-    "imported_at": "2026-10-25T03:26:38.800356+00:00",
-    "sha256": "2c9e69b82ac596a2fe660b56656509570cfba3c2e4c50be75eaf624eee1bc6f8",
-    "input_file": null
+    "imported_at": "2026-11-24T21:13:32.791286+00:00",
+    "sha256": "acb122715bd90aeacf61f4559722ccf0b7de9c63317200a6dd7480246488f1e6",
+    "input_file": "nyc-transit-hub-y1-20261124-subway.zip"
   }
 }

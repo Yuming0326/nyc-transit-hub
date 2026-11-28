@@ -176,5 +176,6 @@
         }
       ]
     }
-  ]
+  ],
+  "fixture_notes": "Synthetic API responses. Catalog entities and geometry are checked against Y2–Y4 imports; times, trip/vehicle IDs, alerts and journeys are invented for UI development. No future endpoint is registered by fixtures."
 }
